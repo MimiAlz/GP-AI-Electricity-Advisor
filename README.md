@@ -21,22 +21,31 @@ Input:
 -	Old electricity bills.
 -	Basic family info (e.g. AC and heater usage hours, laundry frequency per week). 
 -	Weather data (hot/cold weeks). 
--	Tariff rules in Jordan (the jump after 300 and 600 kWh). 
+-	Tariff rules in Jordan (the jump after 300 and 600 kWh).
+  
 Process:
+
 -	Estimates power consumption per appliance (AC, heater, fridge, etc.). 
 -	Shows if the family is close to exceeding a tariff limit. 
 -	Suggests changes (e.g. “Use the AC one hour less daily to save 10 JOD”).
--	Lets users simulate bill changes with sliders (AC hours, heater, laundry frequency, etc.) 
+-	Lets users simulate bill changes with sliders (AC hours, heater, laundry frequency, etc.)
+  
 Output:
+
 -	Expected monthly bill.
 -	Which appliances take the most power. 
 -	How close they are to the next billing tier. 
--	Personalized saving tips. 
+-	Personalized saving tips.
+
 Key Features:
+
 -	Bill Forecasting: Predicts next month’s electricity bill based on historical data, weather, and holidays. 
 -	Scenario Simulator: Allows users to test “what if” changes and instantly see bill effects.
--	Personalized Tips: Offers family-specific advice, like shifting laundry days or reducing AC usage, “Do laundry on the weekend” or “Use the AC one hour less each day”, to save money. 
+-	Personalized Tips: Offers family-specific advice, like shifting laundry days or reducing AC usage, “Do laundry on the weekend” or “Use the AC one hour less each day”, to save money.
+
+  
 Why It’s Helpful: 
+
 Makes energy use visible and understandable, helping families avoid higher tiers, save money, and reduce overall consumption. 
 
 
