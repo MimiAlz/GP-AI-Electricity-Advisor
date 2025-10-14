@@ -13,8 +13,11 @@ Image dataset
 
 Main Idea: 
 Electricity in Jordan is expensive, and bills increase significantly after passing limits like 300 or 600 kWh. Most families don’t know which appliances consume the most power. This app helps families understand, predict, and reduce their electricity bills by showing their expected usage, appliance breakdowns, and personalized saving tips.
+
 How It Works: 
+
 Input: 
+
 -	Old electricity bills.
 -	Basic family info (e.g. AC and heater usage hours, laundry frequency per week). 
 -	Weather data (hot/cold weeks). 
