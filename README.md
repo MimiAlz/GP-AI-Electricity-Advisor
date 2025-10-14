@@ -2,15 +2,6 @@
 
 # GP
 
-237 at morning per kW between 7 AM to 11 PM 
-170 at night per kW between 11 PM to 7 AM
-
--create an automatic plan using CV (optional)
-
--reccomendation for subsidy or non-subsidy
-
-Image dataset
-
 Main Idea: 
 Electricity in Jordan is expensive, and bills increase significantly after passing limits like 300 or 600 kWh. Most families don’t know which appliances consume the most power. This app helps families understand, predict, and reduce their electricity bills by showing their expected usage, appliance breakdowns, and personalized saving tips.
 
@@ -47,5 +38,16 @@ Key Features:
 Why It’s Helpful: 
 
 Makes energy use visible and understandable, helping families avoid higher tiers, save money, and reduce overall consumption. 
+
+
+
+Some random ideas:
+
+-create an automatic plan using CV (optional) using an electricity bill image dataset
+
+-reccomendation for subsidy or non-subsidy tariff plan
+
+
+
 
 
