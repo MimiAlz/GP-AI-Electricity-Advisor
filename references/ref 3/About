@@ -4,6 +4,9 @@ https://github.com/dmkn96/Power_consumption
 Link to kaggle page:
 https://www.kaggle.com/datasets/thedevastator/240000-household-electricity-consumption-records
 
+Link to another source ofor the dataset:
+https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption
+
 Is about the electrical power consumption of a single household along 6 months.
 It contains six months of electricity consumption data for a household, gathered between January 2007 and June 2007. 
 The data includes information on global active power, global reactive power, voltage, global intensity, sub-metering 1 (kitchen), sub-metering 2 (laundry room), and sub-metering 3 (electric water heater and air conditioner). 
