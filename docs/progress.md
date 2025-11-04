@@ -46,9 +46,11 @@ Important point to mention:
             
 - He also mentioned that we send him an email explaining what kind of data we need to ask from JEPCO.
 
+- We sent an email to our supervisor, Dr. Samer, requesting his guidance on the exact type, format, and intervals of data we should ask for from JEPCO to ensure it aligns with our project goals, and received his feedback and clarifications.
+
 ### October 27, Monday:
 
-We sent the email to Dr. Hashem and waited for his reply.
+We sent the email to Dr. Hashem describing our project and specfiying the requested data, and waited for his reply.
 
 ### October 30, Thursday:
 
