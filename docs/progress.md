@@ -93,8 +93,23 @@ He specifically mentioned letting our supervisor, Dr. Samer, contact the JEPCO e
   - Although electricity bills are not influenced by peak hours, they are still relevant. The peak hours in Jordan (according to Eng. Mohammad) are 7 PM to 9 PM,
     which is after employees go home, and the average consumption at this time is 4.9 gW. The normal electricity consumption is 2.7-3.9 gW.
  
+### November 6, Thursday:
 
+We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability and structure of the electricity data we will be using for our project.
 
+*   Dr. Imad informed us that the dataset will be shared with us in a few days.
+
+    *   The data covers **multiple residential areas across Jordan** and we asked for it to be **around 1 to 2 years**.
+
+    *   It contains all the detailed electrical measurements we would need.
+
+*   He also explained that the data is recorded by **smart meters**, which are **not yet installed in all households** across Jordan this is why there are **no peak-hour based tariffs** for residential users.
+
+*   The **data granularity** is **every 30 minutes**.
+
+    *   This level of granularity is lower than what's typically ideal for **NILM**, which usually needs readings every 3--5 minutes.
+
+    *   Because of this, we plan to **interpolate** the data to achieve a 10 minutes granularity or better if possible, allowing us to still be able to continue with **NILM**.
 
 
 
