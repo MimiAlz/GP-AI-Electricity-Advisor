@@ -111,6 +111,10 @@ We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability an
 
     *   Because of this, we plan to **interpolate** the data to achieve a 10 minutes granularity or better if possible, allowing us to still be able to continue with **NILM**.
 
+### November 15, Saturday:
+
+We began drafting the gp report according to the official template given. This includes outlining the Introduction chapter, defining the project problem and scope, and preparing the structure for the remaining chapters.
+
 
 
 
