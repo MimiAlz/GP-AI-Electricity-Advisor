@@ -115,7 +115,7 @@ We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability an
 
 We began drafting the gp report according to the official template given. This includes outlining the Introduction chapter, defining the project problem and scope, and preparing the structure for the remaining chapters.
 
-By the end of the day, the overview section was finished. 
+By the end of the day, the overview and problem statement sections were finished. 
 
 
 
