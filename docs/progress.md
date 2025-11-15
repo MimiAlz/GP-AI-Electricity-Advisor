@@ -97,13 +97,13 @@ He specifically mentioned letting our supervisor, Dr. Samer, contact the JEPCO e
 
 We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability and structure of the electricity data we will be using for our project.
 
-*   Dr. Imad informed us that the dataset will be shared with us in a few days.
+- Dr. Imad informed us that the dataset will be shared with us in a few days.
 
-    *   The data covers **multiple residential areas across Jordan** and we asked for it to be **around 1 to 2 years**.
+    - The data covers **multiple residential areas across Jordan** and we asked for it to be **around 1 to 2 years**.
 
-    *   It contains all the detailed electrical measurements we would need.
+    - It contains all the detailed electrical measurements we would need.
 
-*   He also explained that the data is recorded by **smart meters**, which are **not yet installed in all households** across Jordan this is why there are **no peak-hour based tariffs** for residential users.
+- He also explained that the data is recorded by **smart meters**, which are **not yet installed in all households** across Jordan this is why there are **no peak-hour based tariffs** for residential users.
 
 *   The **data granularity** is **every 30 minutes**.
 
@@ -114,6 +114,10 @@ We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability an
 ### November 15, Saturday:
 
 We began drafting the gp report according to the official template given. This includes outlining the Introduction chapter, defining the project problem and scope, and preparing the structure for the remaining chapters.
+
+By the end of the day, the overview section was finished. 
+
+
 
 
 
