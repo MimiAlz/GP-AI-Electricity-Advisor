@@ -120,6 +120,83 @@ By the end of the day, the overview and problem statement sections were finished
 
 
 
+### November 18, Tuesday:
+
+Today we had a meeting to review our project direction, clarify modeling choices, and prepare for receiving the dataset from JEPCO (provided by Dr. Imad).
+
+## Dataset Granularity and Modeling Approach
+- The JEPCO dataset will have **30-minute granularity**, which wont really work for NILM (normally requires ~3–5 minutes).  
+- Forecasting will not be performed. Instead, we will **perform projection**:  
+  - Resample the 30-minute readings into finer granularity (~5–7 minutes) for NILM input.  
+- Expected dataset includes:  
+  - Multiple areas across Jordan  
+  - 1–2 years of measurements  
+  - Features such as voltage, power, and energy  
+
+## Importance of Correct Timestamp Formatting
+- Timestamps must be clean and consistent before projection.  
+- **Unix timestamps** ensure continuous, evenly spaced time steps.  
+- Proper formatting improves model accuracy and dashboard visuals.
+
+## Dashboard Structure
+The website will have three main pages:  
+1. **Weekly Household View**  
+   - Aggregate household consumption  
+   - Resampled to ~3 minutes  
+   - NILM disaggregation shown on dashboard  
+2. **Long-Term Household View**  
+   - Consumption over 3 months or 1 year  
+   - Projected using regression model  
+   - Displayed as long-term trend graph  
+3. **Area-Level View**  
+   - Total consumption for each area  
+   - Resampled and visualized  
+
+- The NILM model will be trained offline; the dashboard fetches its output from the database.  
+
+## System Workflow (Client → Server → Database → Models)
+1. Front end sends request to backend  
+2. Backend queries **testing SQL database** storing raw JEPCO data  
+3. Backend loads **projection or NILM model**  
+4. Model processes requested portion of data  
+5. Backend returns graph-ready results to front end  
+
+- Training data will stay in **CSV files**, real testing data kept in **SQL**.  
+- Full system architecture diagram will be created in **PlantUML**.
+
+---
+
+# Disaggregation Based on Real Power
+- Convert **real energy → real power** for modeling.  
+- Key columns:  
+  - Timestamp  
+  - Real energy  
+  - Real power (measured or estimated)  
+- Understanding Unix timestamps and data granularity is crucial.
+
+## Reference
+- [Makonin et al., EPEC 2013](https://makonin.com/doc/EPEC_2013.pdf)
+
+## Appliance Categories
+| Code  | Appliance                   |
+|-------|-----------------------------|
+| CDE   | Clothes Dryer               |
+| CWE   | Clothes Washer              |
+| DWE   | Dishwasher                  |
+| FRE   | HVAC / Furnace (AC & Heater)|
+| HPE   | Heat Pump                   |
+| FGE   | Kitchen Fridge              |
+| HTE   | Instant Hot Water Unit      |
+| TVE   | Entertainment (TV/PVR/AMP)  |
+| Extra | Additional / Miscellaneous  |
+
+## Dataset Structure
+- First column: **aggregate whole-house meter**  
+- Next columns: individual appliances (9 total)  
+- Forms **training, testing, and validation datasets**  
+- Testing data stays untouched in SQL database   
+- Aggregate multiple datasets per appliance when possible, especially electric cars  
+- All data must be aggregated for meaningful modeling
 
 
 
