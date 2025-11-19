@@ -196,7 +196,7 @@ The website will have three main pages:
 - Forms **training, testing, and validation datasets**  
 - Testing data stays untouched in SQL database   
 - Aggregate multiple datasets per appliance when possible, especially electric cars  
-- All data must be aggregated for meaningful modeling
+- All data must be aggregated for meaningful modeling.
 
 
 
