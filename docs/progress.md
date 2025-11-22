@@ -1,7 +1,7 @@
 ## This file contains the current progress of this project, ordered by date.
 ## For the overall summary and goals of the project, check #README.md
 
-### October 20, Monday:
+## October 20, Monday:
 
 Set up the first meeting between the supervisor and project members to discuss the project's direction. What we have agreed on so far:
 
@@ -13,7 +13,7 @@ Set up the first meeting between the supervisor and project members to discuss t
           
 - Downloading Linux on our devices to work with
 
-### October 23, Thursday:
+## October 23, Thursday:
 
 Due to some connections, we were able to visit JO Petrol to ask if they have any data they can give us, and they gave us the following advice:
 
@@ -39,7 +39,7 @@ Important point to mention:
 
 - Eng. Yousef AlAdaileh has contacted JEPCO on our behalf and obtained the name of the university's Dr., Dr. Fadi, who signed the contract, then called Mariam to inform her of the name.
 
-### October 26, Sunday: 
+## October 26, Sunday: 
 
 - We went to the university's dean’s office to inquire about the deal with JEPCO, who then sent us to Dr. Hashem (the university's external affairs director(?)),
   who then established contact with JEPCO on our behalf to inquire about the deal and whether we can use it to obtain the data that we need.
@@ -48,18 +48,18 @@ Important point to mention:
 
 - We sent an email to our supervisor, Dr. Samer, requesting his guidance on the exact type, format, and intervals of data we should ask for from JEPCO to ensure it aligns with our project goals, and received his feedback and clarifications.
 
-### October 27, Monday:
+## October 27, Monday:
 
 We sent the email to Dr. Hashem describing our project and specfiying the requested data, and waited for his reply.
 
-### October 30, Thursday:
+## October 30, Thursday:
 
 - Dr. Hashem reached back to us through email to meet him in his office, and as we did, he gave us the number of an executive, Dr. Imad, at JEPCO to establish contact with.
 He specifically mentioned letting our supervisor, Dr. Samer, contact the JEPCO executive to arrange a meeting.
 
 - Eng. Mohammad Alhamarsheh, another executive from JO Petrol, reached out to us and informed us that they have data that we might find useful, so we arranged to meet on Sunday, November 2nd.
 
-### November 2, Sunday:
+## November 2, Sunday:
 
 - Dr. Samer contacted Dr. Imad and agreed to talk on Wednesday, November 5th.
 
@@ -93,7 +93,7 @@ He specifically mentioned letting our supervisor, Dr. Samer, contact the JEPCO e
   - Although electricity bills are not influenced by peak hours, they are still relevant. The peak hours in Jordan (according to Eng. Mohammad) are 7 PM to 9 PM,
     which is after employees go home, and the average consumption at this time is 4.9 gW. The normal electricity consumption is 2.7-3.9 gW.
  
-### November 6, Thursday:
+## November 6, Thursday:
 
 We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability and structure of the electricity data we will be using for our project.
 
@@ -111,7 +111,7 @@ We had a meeting with **Dr. Imad** from **JEPCO** to discuss the availability an
 
     *   Because of this, we plan to **interpolate** the data to achieve a 10 minutes granularity or better if possible, allowing us to still be able to continue with **NILM**.
 
-### November 15, Saturday:
+## November 15, Saturday:
 
 We began drafting the gp report according to the official template given. This includes outlining the Introduction chapter, defining the project problem and scope, and preparing the structure for the remaining chapters.
 
@@ -120,25 +120,64 @@ By the end of the day, the overview and problem statement sections were finished
 
 
 
-### November 18, Tuesday:
+## November 18, Tuesday:
 
-Today we had a meeting to review our project direction, clarify modeling choices, and prepare for receiving the dataset from JEPCO (provided by Dr. Imad).
+Today we had a meeting to review our project direction, clarify modeling choices, and prepare for receiving the dataset from JEPCO (provided by Dr. Imad). The main points that were discussed:
 
-## Dataset Granularity and Modeling Approach
-- The JEPCO dataset will have **30-minute granularity**, which wont really work for NILM (normally requires ~3–5 minutes).  
-- Forecasting will not be performed. Instead, we will **perform projection**:  
-  - Resample the 30-minute readings into finer granularity (~5–7 minutes) for NILM input.  
-- Expected dataset includes:  
+### Main Goals and Objectives
+
+The ultimate goal is to create a dashboard for the electricity company to flatten our demand in an attempt to increase granularity, which improves maintainability.
+
+**Project Objectives:**
+
+- _Objective 1:_ House-Level Consumption Disaggregation — Use high-resolution public datasets to train a NILM model capable of breaking down household aggregate consumption into major appliance loads. JEPCO data is not required for this stage due to granularity limitations. The disaggregation results will later be demonstrated to JEPCO to highlight the value of this feature.
+
+- _Objective 2:_ ML-based forecasting for Individual Houses — Using approximately one year of 30-minute consumption data per house, the system will generate short- and medium-term forecasts (e.g., 2 weeks, 1 month, 3 months) and display them on an interactive timeline.
+
+- _Objective 3:_ Area-Level Load Aggregation and Forecasting — Aggregate historical consumption from houses within the same area or feeder and produce multi-horizon forecasts to help JEPCO understand neighborhood demand patterns and anticipate future load requirements.
+
+
+### Dataset Granularity and Modeling Approach
+
+There will be two main models used in this project, each with different datasets and different pipelines.
+
+- **For Objective 1:** The NILM model will need a hypothetical dataset (not affiliated with JEPCO), all stored offline on its own database. This data will be obtained online through public datasets.
+   - Must convert **real energy → real power** for modeling.  
+   - Key columns:  
+     - Timestamp
+     - Current 
+     - Real energy  
+     - Real power (measured or estimated)
+     - Reactive power (if available to improve results)
+    
+   - Understanding Unix timestamps and data granularity is crucial.
+
+
+- **For Objective 2 & 3:** A Regression model will be used for the forecasting/projection part of the project, which will be based on the JEPCO dataset. This dataset will be used to train two regression models - each having its own purpose. Expected dataset includes:  
   - Multiple areas across Jordan  
-  - 1–2 years of measurements  
+  - 1–2 years of measurements
+  - Timestamps
   - Features such as voltage, power, and energy  
 
-## Importance of Correct Timestamp Formatting
+
+
+### Dataset Split
+
+Both datasets will be split into:
+
+- 70% training
+- 20% Validation
+- 10% Testing
+
+Testing Data will be used for presentation and utility purposes as well.
+
+### Importance of Correct Timestamp Formatting
 - Timestamps must be clean and consistent before projection.  
 - **Unix timestamps** ensure continuous, evenly spaced time steps.  
 - Proper formatting improves model accuracy and dashboard visuals.
 
-## Dashboard Structure
+
+### Dashboard Structure
 The website will have three main pages:  
 1. **Weekly Household View**  
    - Aggregate household consumption  
@@ -146,15 +185,15 @@ The website will have three main pages:
    - NILM disaggregation shown on dashboard  
 2. **Long-Term Household View**  
    - Consumption over 3 months or 1 year  
-   - Projected using regression model  
-   - Displayed as long-term trend graph  
+   - Projected using a regression model  
+   - Displayed as a long-term trend graph  
 3. **Area-Level View**  
    - Total consumption for each area  
    - Resampled and visualized  
+  
 
-- The NILM model will be trained offline; the dashboard fetches its output from the database.  
 
-## System Workflow (Client → Server → Database → Models)
+### System Workflow (Client → Server → Database → Models)
 1. Front end sends request to backend  
 2. Backend queries **testing SQL database** storing raw JEPCO data  
 3. Backend loads **projection or NILM model**  
@@ -166,18 +205,12 @@ The website will have three main pages:
 
 ---
 
-# Disaggregation Based on Real Power
-- Convert **real energy → real power** for modeling.  
-- Key columns:  
-  - Timestamp  
-  - Real energy  
-  - Real power (measured or estimated)  
-- Understanding Unix timestamps and data granularity is crucial.
 
-## Reference imp
+### Reference
 - [Makonin et al., EPEC 2013](https://makonin.com/doc/EPEC_2013.pdf)
 
-## Appliance Categories
+
+### Appliance Categories
 | Code  | Appliance                   |
 |-------|-----------------------------|
 | CDE   | Clothes Dryer               |
@@ -189,8 +222,12 @@ The website will have three main pages:
 | HTE   | Instant Hot Water Unit      |
 | TVE   | Entertainment (TV/PVR/AMP)  |
 | Extra | Additional / Miscellaneous  |
+| EV    | Electrical Vehicles         |
 
-## Dataset Structure
+Note: EV can only be measured if all other categories are available, otherwise it will be impossible to disaggregate.
+
+
+### Dataset Structure
 - First column: **aggregate whole-house meter**  
 - Next columns: individual appliances (9 total)  
 - Forms **training, testing, and validation datasets**  
