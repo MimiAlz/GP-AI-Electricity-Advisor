@@ -178,6 +178,7 @@ Testing Data will be used for presentation and utility purposes as well.
 
 
 ### Dashboard Structure
+The dashboard front-end will be developed using **Streamlit**.
 The website will have three main pages:  
 1. **Weekly Household View**  
    - Aggregate household consumption  
