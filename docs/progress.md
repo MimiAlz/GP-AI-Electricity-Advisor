@@ -174,7 +174,7 @@ The website will have three main pages:
   - Real power (measured or estimated)  
 - Understanding Unix timestamps and data granularity is crucial.
 
-## Reference
+## Reference imp
 - [Makonin et al., EPEC 2013](https://makonin.com/doc/EPEC_2013.pdf)
 
 ## Appliance Categories
