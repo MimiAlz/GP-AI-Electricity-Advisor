@@ -237,6 +237,9 @@ Note: EV can only be measured if all other categories are available, otherwise i
 - All data must be aggregated for meaningful modeling.
 
 
+## December 2, Tuesday:
+Completed Sections 2.1 (Project Deliverbales), 2.2 (Project Tasks), 2.4 (Risk Assessment), and 2.6 (Project Management Tools).
+
 
 
 
