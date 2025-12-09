@@ -1,0 +1,6 @@
+@startuml
+actor Customer
+usecase "Place Order" as U1
+
+Customer --> U1
+@enduml
