@@ -1,0 +1,82 @@
+@startuml
+!define RECTANGLE class
+skinparam groupInheritance 3
+skinparam roundcorner 15
+skinparam classAttributeIconSize 0
+
+rectangle "Web Dashboard" as dashboard {
+  rectangle "House Selection\nComponent" as house_select
+  rectangle "Time Window\nSelector" as time_selector
+  rectangle "Consumption\nVisualization" as viz
+  rectangle "Disaggregation\nResults Display" as results
+}
+
+rectangle "API Gateway" as api_gateway {
+  rectangle "REST API" as rest_api
+}
+
+rectangle "Backend Services" as backend {
+  rectangle "Request Handler" as request_handler
+  rectangle "Data Orchestrator" as orchestrator
+  rectangle "NILM Service" as nilm_service
+}
+
+rectangle "Data Layer" as data_layer {
+  database "Smart Meter\nDatabase" as meter_db {
+    rectangle "3-min Granularity\nConsumption Data" as raw_data
+  }
+  
+  database "Model Registry" as model_registry {
+    rectangle "Pre-trained\nNILM Models" as nilm_models
+  }
+  
+  database "Results Cache" as cache {
+    rectangle "Disaggregation\nResults" as cached_results
+  }
+}
+
+rectangle "ML Infrastructure" as ml_infra {
+  rectangle "NILM Model\nInference Engine" as inference
+  rectangle "Model Serving\nPlatform" as model_serve
+}
+
+' Connections
+house_select --> rest_api : House ID
+time_selector --> rest_api : Time Window
+rest_api --> request_handler : API Request
+
+request_handler --> orchestrator : Process Request
+orchestrator --> meter_db : Fetch Smart Meter Data
+orchestrator --> nilm_service : Trigger Disaggregation
+
+nilm_service --> model_registry : Load Pre-trained Model
+nilm_service --> ml_infra : Execute NILM Inference
+ml_infra --> inference : Run Model
+inference --> model_serve : Model Inference
+
+nilm_service --> cache : Store Results
+orchestrator --> cache : Retrieve Cached Results
+
+orchestrator --> rest_api : Return Disaggregated Data
+rest_api --> viz : Aggregate Load Data
+rest_api --> results : Appliance Breakdown\n(Major Appliances + "Others")
+
+' Grouping
+dashboard -[hidden]- api_gateway
+api_gateway -[hidden]- backend
+backend -[hidden]- data_layer
+data_layer -[hidden]- ml_infra
+
+note right of nilm_service
+  Input: Aggregate power signal
+  Output: Disaggregated appliance loads
+  Groups small loads into "Others" category
+end note
+
+note right of viz
+  Visualizes aggregate load
+  and disaggregated appliances
+  on same line graph
+end note
+
+@enduml
