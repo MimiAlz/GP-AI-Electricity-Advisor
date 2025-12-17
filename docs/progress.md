@@ -245,6 +245,234 @@ Completed Sections 2.1 (Project Deliverbales), 2.2 (Project Tasks), 2.4 (Risk As
 
 
 
+## December 17, Wednssday:
+
+## 1. Key Areas the Doctors Are Expected to Focus On
+
+##Data Science & Statistics
+
+* Dealing with **missing values**.
+* **Combining datasets** coming from different sources.
+* Handling **data quality issues** and inconsistencies.
+
+### Engineering & Machine Learning
+
+* Focus on **system architecture** (similar to Dr. Aref’s approach).
+* Designing clear **architecture**, **block**, and **system** diagrams.
+
+
+## 2. Mathematical Background & Faculty Expectations
+
+* Dr. Mohammad and Dr. Serene will discuss and question the **mathematical background**.
+* Key questions may include:
+
+  * Which model will be used?
+  * Why this model and not another?
+* Dr. Mohammad will ask about all methods used for **time series data**.
+* **ARIMA** must be understood conceptually and mathematically, and other time series approaches should also be studied.
+
+
+## 3. System Outputs (Dashboard-Oriented)
+
+The final output of the system is a **dashboard**, which includes:
+
+1. **NILM**: Used to motivate JEPCO to provide better data granularity.
+2. **Time Series Projection / Forecasting**: Based on the GitHub link shared by the doctor during the meeting.
+3. **Area-Level Load Aggregation and Forecasting**: After forecasting each house individually, an additional model is built to forecast the entire area.
+
+* The dashboard will be implemented using **Streamlit**.
+* Streamlit helps define and clarify the **architecture design**.
+
+
+## 4. Theory Before Implementation
+
+* Fully understand the theory before starting implementation.
+
+
+## 5. Relationship Between Outputs 2 and 3
+
+* Outputs 2 and 3 are similar but:
+
+  * They use two different datasets.
+  * They are essentially repetitions with slight differences in scope.
+
+
+## 6. Time Series Data Rules (Very Important)
+
+* Time series data **cannot be shuffled** (shuffling destroys timestamps and breaks sequence order).
+* You cannot test using only winter data or only summer data.
+* These rules will formally apply in **GP2**, but must be clearly understood now.
+
+
+## 7. NILM as the Core Challenge
+
+* NILM (Objective 1) is the **most challenging part** of the project.
+* A proper model for **EMPD data** must be selected first.
+* Only after choosing the NILM model can the **architecture** be built correctly.
+
+
+## 8. Innovation & Integration
+
+* **Integration** is key when discussing innovation.
+* Combining multiple components into one system qualifies as **innovation**.
+* The project aims to **advance the industry**, not just replicate existing work.
+
+
+## 9. Feasibility Study
+
+* Conduct a feasibility study to justify why NILM is a good solution.
+
+
+## 10. Complexity & Mathematical Evaluation
+
+* Evaluate the **complexity of time series methods** mathematically.
+* NILM data comes from **different sources** with **different granularities**, requiring:
+
+  * Down-sampling or up-sampling.
+  * Understanding **interpolation techniques** and their implications.
+
+
+## 11. Load Pattern Extraction
+
+* Analyze how complex it is to:
+
+  * Retrieve load patterns.
+  * Recognize and distinguish each appliance pattern.
+
+
+
+## 12. Market & Literature Review
+
+* Discuss existing solutions in the market.
+* Perform a proper **literature review**:
+
+  * Existing solutions
+  * Limitations
+  * How your system differs or improves upon them
+
+
+## 13. Design & Problem Analysis
+
+* Perform a design analysis:
+
+  * How components are set up
+  * How they interact
+* Break down the problem properly and systematically.
+* Fully understand the problem before proposing solutions.
+
+
+## 14. Diagrams & UML
+
+* Create multiple diagrams to represent the system clearly.
+* Include UML diagrams where appropriate.
+
+
+## 15. Power Calculation & Estimation
+
+* Include **power consumption calculations** and estimation methods.
+
+
+## 16. Study Priorities
+
+* Spend significant time studying **time series** (many questions will focus on this).
+* Also deeply understand **NILM**, as it is new and will attract strong interest.
+
+
+## 17. Documentation Order
+
+* Understand and document everything conceptually **before implementation**.
+* Start with **data preprocessing** when documenting the technical pipeline; this helps design more accurate diagrams.
+
+
+## 18. Software Design & Objectives
+
+* The software has **3 main objectives**, each with **two phases**:
+
+  1. **Training**
+  2. **Deployment** (displayed on the dashboard)
+
+## Training Phase
+
+* Data is static.
+* Data is **not stored in a database** during training.
+
+## Deployment Phase
+
+* Streamlit must be interactive.
+* Data must be stored in a **database** so the dashboard can communicate with the model.
+* Workflow:
+
+  * Dashboard calls the model
+  * Model processes data
+  * Results are returned and displayed
+
+## 19. Sequence Diagrams
+
+* Two main sequence diagrams:
+
+  * Training sequence diagram
+  * Deployment sequence diagram
+
+
+## 20. Software Design Perspectives
+
+* Consider four perspectives when designing the software:
+
+  1. **External perspective** – very high-level and easy to understand
+  2. **Interaction perspective** – system interaction with its environment
+  3. **Structural perspective** – internal structure of the system
+  4. **Behavioral perspective** – system behavior over time
+* At least 5 diagrams are required for **GP1**.
+
+
+## 21. Activity Diagrams
+
+* Explain **external interactions**, represent **use cases**, and record **internal system activities**.
+* Used for both **external context** and **internal workflow**.
+
+
+## 22. Dashboard Use Cases
+
+* Key questions: What will the user do?
+
+## Identified Use Cases
+
+1. View yearly projection per home
+2. View yearly or monthly projection per home for the entire area
+3. Identify patterns in data (NILM)
+
+* A **use case table** must be created.
+
+## 23. Diagram Derivation Flow
+
+* From use cases → build **sequence diagrams**.
+* From sequence diagrams → derive **class (structural) diagrams**.
+
+
+## 24. Required Diagrams
+
+* Make sure to use correct symbols for each diagram type:
+  1. Use Case Diagram
+  2. Activity Diagram (internal & external – for training and deployment)
+  3. Sequence Diagram
+  4. Context Diagram
+  5. Class / Structural Diagram
+  6. State Transition Diagram (optional)
+
+## 25. Using LLMs for Design Assistance
+
+* Tell an LLM the **entire project story** to extract all use cases.
+* Include **all details (big and small)** in the prompt.
+* After identifying use cases, generate **PlantUML code** for diagrams.
+* **Important:** All outputs must be **reviewed and validated manually**.
+
+## 26. Tools & Resources
+
+* Explore datasets on **OpenML**.
+* Use **MLflow** to:
+  * Record all experiments
+  * Track metrics
+  * Generate comparison tables
 
 
 
