@@ -81,17 +81,18 @@ elif tab == "Login":
     names = [users[u]["name"] for u in usernames]
     passwords = [users[u]["password"] for u in usernames]
 
-    # Streamlit Authenticator expects hashed passwords (we will use SHA256)
-    # Using plaintext hashed passwords directly
+    # Correct credentials structure for streamlit_authenticator
+    credentials = {"usernames": {usernames[i]: {"name": names[i], "password": passwords[i]} for i in range(len(usernames))}}
+
     authenticator = stauth.Authenticate(
-    credentials={"usernames": {usernames[i]: {"name": names[i], "password": passwords[i]} for i in range(len(usernames))}},
-    cookie_name="dashboard_cookie",
-    key="dashboard_signature",
-    cookie_expiry_days=1
-)
+        credentials=credentials,
+        cookie_name="dashboard_cookie",
+        key="dashboard_signature",
+        cookie_expiry_days=1
+    )
 
-
-    name, authentication_status, username = authenticator.login("Login", "main")
+    # Correct keyword argument for location
+    name, authentication_status, username = authenticator.login(form_name="Login", location="main")
 
     if authentication_status:
         st.session_state.authenticated = True
