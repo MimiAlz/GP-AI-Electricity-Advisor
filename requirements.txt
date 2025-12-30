@@ -11,3 +11,4 @@ streamlit
 pandas
 numpy
 plotly
+streamlit-authenticator
