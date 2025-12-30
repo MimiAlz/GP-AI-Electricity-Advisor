@@ -22,7 +22,7 @@ st.set_page_config(
 USER_FILE = "users.json"
 user_file_path = Path(USER_FILE)
 if not user_file_path.exists():
-    user_file_path.write_text("{}")  # Create empty JSON if not exist
+    user_file_path.write_text("{}")
 
 def load_users():
     with open(USER_FILE, "r") as f:
@@ -91,16 +91,16 @@ elif tab == "Login":
         cookie_expiry_days=1
     )
 
-    # Correct keyword argument for location
-    name, authentication_status, username = authenticator.login(form_name="Login", location="main")
+    # Use login_result instead of unpacking
+    login_result = authenticator.login(form_name="Login", location="main")
 
-    if authentication_status:
+    if login_result:
         st.session_state.authenticated = True
-        st.session_state.username = username
-        st.session_state.name = name
-    elif authentication_status is False:
+        st.session_state.username = login_result["username"]
+        st.session_state.name = login_result["name"]
+    elif login_result is False:
         st.error("❌ National ID or password is incorrect")
-    elif authentication_status is None:
+    elif login_result is None:
         st.warning("⚠ Please enter your National ID and password")
 
 # Stop app if not authenticated
