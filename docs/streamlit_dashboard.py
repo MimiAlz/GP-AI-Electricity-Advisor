@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import yaml
-from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 
 # -------------------------------------------------
@@ -16,17 +14,21 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# Mock authentication config (conceptual)
+# Authentication config (FIXED)
 # -------------------------------------------------
+hashed_passwords = stauth.Hasher().hash_passwords(
+    ["admin123", "user123"]
+)
+
 credentials = {
     "usernames": {
         "admin": {
             "name": "Admin User",
-            "password": stauth.Hasher(["admin123"]).generate()[0]
+            "password": hashed_passwords[0]
         },
         "user1": {
             "name": "House User",
-            "password": stauth.Hasher(["user123"]).generate()[0]
+            "password": hashed_passwords[1]
         }
     }
 }
@@ -39,9 +41,12 @@ authenticator = stauth.Authenticate(
 )
 
 # -------------------------------------------------
-# LOGIN (Option 1 – FIXED API)
+# LOGIN
 # -------------------------------------------------
-name, authentication_status, username = authenticator.login("Login", "main")
+name, authentication_status, username = authenticator.login(
+    "Login",
+    location="main"
+)
 
 if authentication_status:
     st.session_state.authenticated = True
@@ -68,7 +73,7 @@ authenticator.logout("Logout", "sidebar")
 st.title("⚡ Power Consumption Analytics Dashboard")
 
 # -------------------------------------------------
-# Mock Data Generators (CONCEPTUAL)
+# Mock Data Generators
 # -------------------------------------------------
 def generate_time_series(start, end, freq="15min"):
     return pd.date_range(start=start, end=end, freq=freq)
