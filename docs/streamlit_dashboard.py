@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# Credentials file path (unchanged)
+# Credentials file
 # -------------------------------------------------
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
@@ -27,6 +27,9 @@ def load_credentials():
 
 credentials = load_credentials()
 
+# -------------------------------------------------
+# Authenticator
+# -------------------------------------------------
 authenticator = stauth.Authenticate(
     credentials,
     cookie_name="power_dashboard",
@@ -35,11 +38,11 @@ authenticator = stauth.Authenticate(
 )
 
 # -------------------------------------------------
-# LOGIN
+# LOGIN  ✅ FIXED
 # -------------------------------------------------
 name, authentication_status, username = authenticator.login("Login", "main")
 
-if authentication_status:
+if authentication_status is True:
     st.success(f"Welcome {name}")
 elif authentication_status is False:
     st.error("Username/password is incorrect")
@@ -48,6 +51,9 @@ else:
     st.info("Please enter your username and password")
     st.stop()
 
+# -------------------------------------------------
+# LOGOUT
+# -------------------------------------------------
 authenticator.logout("Logout", "sidebar")
 
 # -------------------------------------------------
@@ -56,7 +62,7 @@ authenticator.logout("Logout", "sidebar")
 st.title("⚡ Power Consumption Analytics Dashboard")
 
 # -------------------------------------------------
-# Appliance categories (NEW)
+# Appliance categories (UNCHANGED)
 # -------------------------------------------------
 LOAD_CATEGORIES = {
     "CDE": "Clothes Dryer",
@@ -86,7 +92,7 @@ def generate_house_data(house_id, start, end):
         "aggregate": aggregate
     }
 
-    for code in LOAD_CATEGORIES.keys():
+    for code in LOAD_CATEGORIES:
         data[code] = aggregate * np.random.uniform(0.05, 0.3, len(time_index))
 
     return pd.DataFrame(data)
@@ -141,7 +147,7 @@ end_date = st.sidebar.date_input(
 )
 
 # -------------------------------------------------
-# SECTION 1 – House Load Disaggregation (UPDATED)
+# SECTION 1 – House Load Disaggregation
 # -------------------------------------------------
 if section == "House Load Disaggregation":
     st.subheader("🏠 Aggregate vs Individual Load Consumption")
