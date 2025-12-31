@@ -139,5 +139,115 @@ end_date = st.sidebar.date_input(
 )
 
 # -------------------------------------------------
-# The rest of your sections…
-# (same as before, omitted for brevity)
+# SECTION 1 – House Load Disaggregation
+# -------------------------------------------------
+if section == "House Load Disaggregation":
+    st.subheader("🏠 Aggregate vs Individual Load Consumption")
+
+    house_id = st.sidebar.selectbox(
+        "House / Customer ID",
+        ["House_001", "House_002", "House_003"]
+    )
+
+    df = generate_house_data(house_id, start_date, end_date)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name="Aggregate",
+        line=dict(width=3)
+    ))
+
+    for load in ["HVAC", "Lighting", "Appliances", "Other"]:
+        fig.add_trace(go.Scatter(
+            x=df["timestamp"],
+            y=df[load],
+            name=load
+        ))
+
+    fig.update_layout(
+        title=f"House {house_id} – Aggregate & Load Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# -------------------------------------------------
+# SECTION 2 – House Forecast
+# -------------------------------------------------
+elif section == "House Consumption Forecast":
+    st.subheader("📈 House-Level Forecast")
+
+    house_id = st.sidebar.selectbox(
+        "House / Customer ID",
+        ["House_001", "House_002", "House_003"]
+    )
+
+    df = generate_house_data(house_id, start_date, end_date)
+    forecast_df = generate_forecast(df)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name="Historical"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=forecast_df["timestamp"],
+        y=forecast_df["forecast"],
+        name="Forecast",
+        line=dict(dash="dash")
+    ))
+
+    fig.update_layout(
+        title=f"House {house_id} – Historical & Forecasted Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# -------------------------------------------------
+# SECTION 3 – Area Forecast
+# -------------------------------------------------
+elif section == "Area Consumption Forecast":
+    st.subheader("🌍 Area-Level Forecast")
+
+    area_id = st.sidebar.selectbox(
+        "Area ID",
+        ["Area_A", "Area_B", "Area_C"]
+    )
+
+    df = generate_area_data(area_id, start_date, end_date)
+    forecast_df = generate_forecast(df)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name="Historical Area Consumption"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=forecast_df["timestamp"],
+        y=forecast_df["forecast"],
+        name="Forecast",
+        line=dict(dash="dash")
+    ))
+
+    fig.update_layout(
+        title=f"Area {area_id} – Historical & Forecasted Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
