@@ -3,7 +3,10 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import yaml
+from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
+import os
 
 # -------------------------------------------------
 # Page config
@@ -14,22 +17,15 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# Authentication config
+# Credentials file path (unchanged)
 # -------------------------------------------------
-credentials = {
-    "usernames": {
-        "admin": {
-            "name": "Admin User",
-            "password": "admin123"
-        },
-        "user1": {
-            "name": "House User",
-            "password": "user123"
-        }
-    }
-}
+CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
-credentials = stauth.Hasher().hash_passwords(credentials)
+def load_credentials():
+    with open(CREDENTIALS_FILE, "r") as file:
+        return yaml.load(file, Loader=SafeLoader)
+
+credentials = load_credentials()
 
 authenticator = stauth.Authenticate(
     credentials,
@@ -38,55 +34,42 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=1
 )
 
-# Sidebar Signup
-st.sidebar.header("User Access")
-signup_clicked = st.sidebar.checkbox("Sign Up")
-if signup_clicked:
-    st.sidebar.subheader("Create a New Account")
-    new_username = st.sidebar.text_input("Username")
-    new_name = st.sidebar.text_input("Full Name")
-    new_password = st.sidebar.text_input("Password", type="password")
-    if st.sidebar.button("Register"):
-        if new_username in credentials["usernames"]:
-            st.sidebar.error("Username already exists!")
-        else:
-            credentials["usernames"][new_username] = {
-                "name": new_name,
-                "password": new_password
-            }
-            credentials = stauth.Hasher().hash_passwords(credentials)
-            st.sidebar.success(f"Account created for {new_name}. Please log in.")
-
 # -------------------------------------------------
 # LOGIN
 # -------------------------------------------------
-authenticator.login(location="main", key="Login")
+name, authentication_status, username = authenticator.login("Login", "main")
 
-# Now read from session_state
-auth_status = st.session_state.get("authentication_status")
-user_name = st.session_state.get("name")
-user_username = st.session_state.get("username")
-
-if auth_status:
-    st.success(f"Welcome {user_name}")
-
-elif auth_status is False:
+if authentication_status:
+    st.success(f"Welcome {name}")
+elif authentication_status is False:
     st.error("Username/password is incorrect")
     st.stop()
-
 else:
     st.info("Please enter your username and password")
     st.stop()
 
-# -------------------------------------------------
-# LOGOUT
-# -------------------------------------------------
 authenticator.logout("Logout", "sidebar")
 
 # -------------------------------------------------
 # Title
 # -------------------------------------------------
 st.title("⚡ Power Consumption Analytics Dashboard")
+
+# -------------------------------------------------
+# Appliance categories (NEW)
+# -------------------------------------------------
+LOAD_CATEGORIES = {
+    "CDE": "Clothes Dryer",
+    "CWE": "Clothes Washer",
+    "DWE": "Dishwasher",
+    "FRE": "HVAC / Furnace (AC & Heater)",
+    "HPE": "Heat Pump",
+    "FGE": "Kitchen Fridge",
+    "HTE": "Instant Hot Water Unit",
+    "TVE": "Entertainment (TV/PVR/AMP)",
+    "Extra": "Additional / Miscellaneous",
+    "EV": "Electrical Vehicles"
+}
 
 # -------------------------------------------------
 # Mock Data Generators
@@ -98,15 +81,15 @@ def generate_house_data(house_id, start, end):
     time_index = generate_time_series(start, end)
     aggregate = np.random.uniform(0.5, 5.0, len(time_index))
 
-    df = pd.DataFrame({
+    data = {
         "timestamp": time_index,
-        "aggregate": aggregate,
-        "HVAC": aggregate * np.random.uniform(0.3, 0.5),
-        "Lighting": aggregate * np.random.uniform(0.1, 0.2),
-        "Appliances": aggregate * np.random.uniform(0.2, 0.3),
-        "Other": aggregate * np.random.uniform(0.05, 0.15)
-    })
-    return df
+        "aggregate": aggregate
+    }
+
+    for code in LOAD_CATEGORIES.keys():
+        data[code] = aggregate * np.random.uniform(0.05, 0.3, len(time_index))
+
+    return pd.DataFrame(data)
 
 def generate_area_data(area_id, start, end):
     time_index = generate_time_series(start, end)
@@ -158,7 +141,7 @@ end_date = st.sidebar.date_input(
 )
 
 # -------------------------------------------------
-# SECTION 1 – House Load Disaggregation
+# SECTION 1 – House Load Disaggregation (UPDATED)
 # -------------------------------------------------
 if section == "House Load Disaggregation":
     st.subheader("🏠 Aggregate vs Individual Load Consumption")
@@ -179,11 +162,11 @@ if section == "House Load Disaggregation":
         line=dict(width=3)
     ))
 
-    for load in ["HVAC", "Lighting", "Appliances", "Other"]:
+    for code, label in LOAD_CATEGORIES.items():
         fig.add_trace(go.Scatter(
             x=df["timestamp"],
-            y=df[load],
-            name=load
+            y=df[code],
+            name=label
         ))
 
     fig.update_layout(
