@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
+import os 
 
 # -------------------------------------------------
 # Page config
@@ -15,7 +16,7 @@ st.set_page_config(page_title="Power Consumption Dashboard", layout="wide")
 # -------------------------------------------------
 # Load credentials from YAML
 # -------------------------------------------------
-CREDENTIALS_FILE = "credentials.yaml"
+CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
 def load_credentials():
     with open(CREDENTIALS_FILE, "r") as file:
