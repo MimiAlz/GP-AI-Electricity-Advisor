@@ -14,24 +14,23 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# Authentication config (FIXED)
+# Authentication config (WORKS for v0.3+)
 # -------------------------------------------------
-hashed_passwords = stauth.Hasher().hash_passwords(
-    ["admin123", "user123"]
-)
-
 credentials = {
     "usernames": {
         "admin": {
             "name": "Admin User",
-            "password": hashed_passwords[0]
+            "password": "admin123"
         },
         "user1": {
             "name": "House User",
-            "password": hashed_passwords[1]
+            "password": "user123"
         }
     }
 }
+
+# Hash passwords correctly for this version
+credentials = stauth.Hasher().hash_passwords(credentials)
 
 authenticator = stauth.Authenticate(
     credentials,
