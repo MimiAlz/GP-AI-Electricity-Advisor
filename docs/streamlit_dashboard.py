@@ -43,7 +43,7 @@ authenticator = stauth.Authenticate(
 # LOGIN
 # -------------------------------------------------
 name, authentication_status, username = authenticator.login(
-    "Login",
+    name="Login",
     location="main"
 )
 
