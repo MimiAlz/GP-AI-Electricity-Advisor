@@ -7,7 +7,6 @@ ipykernel
 build
 Cython
 wheel
-os
 streamlit>=1.30.0
 streamlit-authenticator>=0.3.0
 plotly>=5.20.0
