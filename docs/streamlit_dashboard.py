@@ -38,6 +38,25 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=1
 )
 
+# Sidebar Signup
+st.sidebar.header("User Access")
+signup_clicked = st.sidebar.checkbox("Sign Up")
+if signup_clicked:
+    st.sidebar.subheader("Create a New Account")
+    new_username = st.sidebar.text_input("Username")
+    new_name = st.sidebar.text_input("Full Name")
+    new_password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Register"):
+        if new_username in credentials["usernames"]:
+            st.sidebar.error("Username already exists!")
+        else:
+            credentials["usernames"][new_username] = {
+                "name": new_name,
+                "password": new_password
+            }
+            credentials = stauth.Hasher().hash_passwords(credentials)
+            st.sidebar.success(f"Account created for {new_name}. Please log in.")
+
 # -------------------------------------------------
 # LOGIN
 # -------------------------------------------------
