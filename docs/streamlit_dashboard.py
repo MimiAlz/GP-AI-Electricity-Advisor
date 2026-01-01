@@ -34,46 +34,48 @@ credentials = load_credentials()
 # Signup form (sidebar) with persistent button
 # -------------------------------------------------
 # -------------------------------------------------
-# Signup form (sidebar) – appears only when button pressed
+# Signup form (sidebar) – persistent
 # -------------------------------------------------
 st.sidebar.header("User Access")
 
-if st.sidebar.button("Sign Up"):
+# Initialize session state for signup form visibility
+if "show_signup" not in st.session_state:
+    st.session_state.show_signup = False
+
+# Toggle signup form visibility
+if st.sidebar.button("Sign Up / Register"):
     st.session_state.show_signup = True
 
-if st.session_state.get("show_signup", False):
+# Display signup form if toggle is True
+if st.session_state.show_signup:
     st.sidebar.subheader("Create a New Account")
-    
-    new_username = st.sidebar.text_input("National ID (numbers only)", key="new_username")
-    new_name = st.sidebar.text_input("Full Name", key="new_name")
-    new_password = st.sidebar.text_input("Password", type="password", key="new_password")
 
-    if st.sidebar.button("Register"):
+    new_username = st.sidebar.text_input("National ID (numbers only)", key="signup_id")
+    new_name = st.sidebar.text_input("Full Name", key="signup_name")
+    new_password = st.sidebar.text_input("Password", type="password", key="signup_pass")
+
+    if st.sidebar.button("Register", key="register_btn"):
         # Validation
         if not new_username.isdigit():
             st.sidebar.error("Username must contain numbers only (national ID).")
-        elif len(new_username) != 10:  # adjust as per your national ID spec
+        elif len(new_username) != 10:
             st.sidebar.error("National ID must be exactly 10 digits.")
-        elif new_username in credentials["usernames"]:
+        elif new_username in credentials["credentials"]["usernames"]:
             st.sidebar.error("This national ID is already registered!")
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
-            # Hash the new password only
-            hashed_password = stauth.Hasher([new_password]).generate()[0]
-
-            # Add new user
-            credentials["usernames"][new_username] = {
+            # Add the user as plain text password
+            credentials["credentials"]["usernames"][new_username] = {
                 "name": new_name,
-                "password": hashed_password
+                "password": new_password
             }
-
-            # Save to YAML
+            # Save credentials to YAML
             with open(CREDENTIALS_FILE, "w") as file:
                 yaml.dump(credentials, file)
-
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
-            st.session_state.show_signup = False  # hide form after successful signup
+            # Hide signup form after registration
+            st.session_state.show_signup = False
 
 
 
@@ -81,11 +83,10 @@ if st.session_state.get("show_signup", False):
 # Authenticator instance
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
-    credentials["credentials"],
-    credentials["cookie"]["name"],
-    credentials["cookie"]["key"],
-    cookie_expiry_days=credentials["cookie"]["expiry_days"],
-    preauthorized=None
+    credentials,
+    cookie_name="power_dashboard",
+    key="auth",
+    cookie_expiry_days=1
 )
 
 
