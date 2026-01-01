@@ -3,30 +3,24 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
-import streamlit_authenticator as stauth
-import os
+import os 
 
 # -------------------------------------------------
 # Page config
 # -------------------------------------------------
-st.set_page_config(
-    page_title="Power Consumption Dashboard",
-    layout="wide"
-)
+st.set_page_config(page_title="Power Consumption Dashboard", layout="wide")
 
 # -------------------------------------------------
-# Credentials file
+# Load credentials from YAML
 # -------------------------------------------------
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
 def load_credentials():
-    if os.path.exists(CREDENTIALS_FILE):
-        with open(CREDENTIALS_FILE, "r") as file:
-            return yaml.load(file, Loader=SafeLoader) or {"usernames": {}}
-    else:
-        return {"usernames": {}}
+    with open(CREDENTIALS_FILE, "r") as file:
+        return yaml.load(file, Loader=SafeLoader)
 
 def save_credentials(credentials):
     with open(CREDENTIALS_FILE, "w") as file:
@@ -35,7 +29,43 @@ def save_credentials(credentials):
 credentials = load_credentials()
 
 # -------------------------------------------------
-# Authenticator
+# Signup form (sidebar)
+# -------------------------------------------------
+
+st.sidebar.header("User Access")
+
+signup_clicked = st.sidebar.checkbox("Sign Up")
+if signup_clicked:
+    st.sidebar.subheader("Create a New Account")
+    
+    new_username = st.sidebar.text_input("National ID (numbers only)")
+    new_name = st.sidebar.text_input("Full Name")
+    new_password = st.sidebar.text_input("Password", type="password")
+
+    if st.sidebar.button("Register"):
+        # Validation
+        if not new_username.isdigit():
+            st.sidebar.error("Username must contain numbers only (national ID).")
+        elif len(new_username) != 10:  # adjust length as per your national ID spec
+            st.sidebar.error("National ID must be exactly 10 digits.")
+        elif new_username in credentials["usernames"]:
+            st.sidebar.error("This national ID is already registered!")
+        elif not new_name or not new_password:
+            st.sidebar.error("Full name and password are required!")
+        else:
+            # Add the user
+            credentials["usernames"][new_username] = {
+                "name": new_name,
+                "password": new_password
+            }
+            # Hash all passwords and save
+            credentials = stauth.Hasher().hash_passwords(credentials)
+            save_credentials(credentials)
+            st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+
+
+# -------------------------------------------------
+# Authenticator instance
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
     credentials,
@@ -45,47 +75,25 @@ authenticator = stauth.Authenticate(
 )
 
 # -------------------------------------------------
-# Signup form
+# LOGIN
 # -------------------------------------------------
-st.sidebar.header("Sign Up (New User)")
-full_name_input = st.sidebar.text_input("Full Name", key="signup_name")
-username_input = st.sidebar.text_input("National ID (numbers only)", key="signup_id")
-password_input = st.sidebar.text_input("Password", type="password", key="signup_pw")
-signup_button = st.sidebar.button("Sign Up")
+authenticator.login(location="main", key="login_form")
 
-if signup_button:
-    # Basic validations
-    if not username_input.isdigit():
-        st.sidebar.error("Username must be numeric (National ID).")
-    elif full_name_input.strip() == "" or password_input.strip() == "":
-        st.sidebar.error("Please fill in all fields.")
-    elif username_input in credentials["usernames"]:
-        st.sidebar.error("This National ID already exists. Please log in.")
-    else:
-        # Hash password and add to credentials
-        hashed_pw = stauth.Hasher([password_input]).generate()[0]
-        credentials["usernames"][username_input] = {
-            "name": full_name_input,
-            "password": hashed_pw
-        }
-        save_credentials(credentials)
-        st.sidebar.success("User registered successfully! You can now log in.")
+auth_status = st.session_state.get("authentication_status")
+user_name = st.session_state.get("name")
+user_username = st.session_state.get("username")
 
-# -------------------------------------------------
-# Login form
-# -------------------------------------------------
-st.sidebar.header("User Login")
-name, authentication_status, username = authenticator.login("Login", location="sidebar")
-
-if authentication_status:
-    st.success(f"Welcome {name}")
-elif authentication_status is False:
+if auth_status:
+    st.success(f"Welcome {user_name}")
+elif auth_status is False:
     st.error("Username/password is incorrect")
+    st.stop()
 else:
     st.info("Please enter your username and password")
+    st.stop()
 
 # -------------------------------------------------
-# Logout
+# LOGOUT
 # -------------------------------------------------
 authenticator.logout("Logout", "sidebar")
 
@@ -93,22 +101,6 @@ authenticator.logout("Logout", "sidebar")
 # Title
 # -------------------------------------------------
 st.title("⚡ Power Consumption Analytics Dashboard")
-
-# -------------------------------------------------
-# Appliance categories
-# -------------------------------------------------
-LOAD_CATEGORIES = {
-    "CDE": "Clothes Dryer",
-    "CWE": "Clothes Washer",
-    "DWE": "Dishwasher",
-    "FRE": "HVAC / Furnace (AC & Heater)",
-    "HPE": "Heat Pump",
-    "FGE": "Kitchen Fridge",
-    "HTE": "Instant Hot Water Unit",
-    "TVE": "Entertainment (TV/PVR/AMP)",
-    "Extra": "Additional / Miscellaneous",
-    "EV": "Electrical Vehicles"
-}
 
 # -------------------------------------------------
 # Mock Data Generators
@@ -119,10 +111,15 @@ def generate_time_series(start, end, freq="15min"):
 def generate_house_data(house_id, start, end):
     time_index = generate_time_series(start, end)
     aggregate = np.random.uniform(0.5, 5.0, len(time_index))
-    data = {"timestamp": time_index, "aggregate": aggregate}
-    for code in LOAD_CATEGORIES:
-        data[code] = aggregate * np.random.uniform(0.05, 0.3, len(time_index))
-    return pd.DataFrame(data)
+    df = pd.DataFrame({
+        "timestamp": time_index,
+        "aggregate": aggregate,
+        "HVAC": aggregate * np.random.uniform(0.3, 0.5),
+        "Lighting": aggregate * np.random.uniform(0.1, 0.2),
+        "Appliances": aggregate * np.random.uniform(0.2, 0.3),
+        "Other": aggregate * np.random.uniform(0.05, 0.15)
+    })
+    return df
 
 def generate_area_data(area_id, start, end):
     time_index = generate_time_series(start, end)
@@ -133,10 +130,12 @@ def generate_forecast(df, horizon_hours=24):
     last_time = df["timestamp"].iloc[-1]
     future_index = pd.date_range(
         start=last_time + timedelta(minutes=15),
-        periods=horizon_hours*4,
+        periods=horizon_hours * 4,
         freq="15min"
     )
-    forecast = df["aggregate"].iloc[-1] + np.cumsum(np.random.normal(0, 0.05, len(future_index)))
+    forecast = df["aggregate"].iloc[-1] + np.cumsum(
+        np.random.normal(0, 0.05, len(future_index))
+    )
     return pd.DataFrame({"timestamp": future_index, "forecast": forecast})
 
 # -------------------------------------------------
@@ -147,9 +146,13 @@ section = st.sidebar.radio(
     "Select Analysis Type",
     ["House Load Disaggregation", "House Consumption Forecast", "Area Consumption Forecast"]
 )
+
 start_date = st.sidebar.date_input("Start Date", datetime.now() - timedelta(days=7))
 end_date = st.sidebar.date_input("End Date", datetime.now())
 
+# -------------------------------------------------
+# SECTION 1 – House Load Disaggregation
+# -------------------------------------------------
 # -------------------------------------------------
 # SECTION 1 – House Load Disaggregation
 # -------------------------------------------------
@@ -158,9 +161,28 @@ if section == "House Load Disaggregation":
     house_id = st.sidebar.selectbox("House / Customer ID", ["House_001", "House_002", "House_003"])
     df = generate_house_data(house_id, start_date, end_date)
 
+    # Define categories
+    LOAD_CATEGORIES = {
+        "CDE": "Clothes Dryer",
+        "CWE": "Clothes Washer",
+        "DWE": "Dishwasher",
+        "FRE": "HVAC / Furnace (AC & Heater)",
+        "HPE": "Heat Pump",
+        "FGE": "Kitchen Fridge",
+        "HTE": "Instant Hot Water Unit",
+        "TVE": "Entertainment (TV/PVR/AMP)",
+        "Extra": "Additional / Miscellaneous",
+        "EV": "Electrical Vehicles"
+    }
+
+    # For demonstration, generate each category as a fraction of aggregate
+    for code in LOAD_CATEGORIES:
+        df[code] = df["aggregate"] * np.random.uniform(0.05, 0.3, len(df))
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Aggregate", line=dict(width=3)))
-
+    
+    # Plot each category
     for code, label in LOAD_CATEGORIES.items():
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df[code], name=label))
 
@@ -172,8 +194,9 @@ if section == "House Load Disaggregation":
     )
     st.plotly_chart(fig, use_container_width=True)
 
+
 # -------------------------------------------------
-# SECTION 2 – House Consumption Forecast
+# SECTION 2 – House Forecast
 # -------------------------------------------------
 elif section == "House Consumption Forecast":
     st.subheader("📈 House-Level Forecast")
@@ -187,14 +210,12 @@ elif section == "House Consumption Forecast":
 
     fig.update_layout(
         title=f"House {house_id} – Historical & Forecasted Consumption",
-        xaxis_title="Time",
-        yaxis_title="Power (kW)",
-        hovermode="x unified"
+        xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified"
     )
     st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------------------------------
-# SECTION 3 – Area Consumption Forecast
+# SECTION 3 – Area Forecast
 # -------------------------------------------------
 elif section == "Area Consumption Forecast":
     st.subheader("🌍 Area-Level Forecast")
@@ -208,8 +229,6 @@ elif section == "Area Consumption Forecast":
 
     fig.update_layout(
         title=f"Area {area_id} – Historical & Forecasted Consumption",
-        xaxis_title="Time",
-        yaxis_title="Power (kW)",
-        hovermode="x unified"
+        xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified"
     )
     st.plotly_chart(fig, use_container_width=True)
