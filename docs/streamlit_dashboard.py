@@ -23,6 +23,10 @@ st.set_page_config(
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
 def load_credentials():
+    if not os.path.exists(CREDENTIALS_FILE):
+        # create empty structure if file does not exist
+        with open(CREDENTIALS_FILE, "w") as f:
+            yaml.dump({"credentials": {"usernames": {}}}, f)
     with open(CREDENTIALS_FILE, "r") as file:
         return yaml.load(file, Loader=SafeLoader)
 
@@ -77,9 +81,14 @@ authenticator = stauth.Authenticate(
 )
 
 # -------------------------------------------------
-# LOGIN
+# LOGIN (new syntax)
 # -------------------------------------------------
-name, authentication_status, username = authenticator.login(location="main")
+authenticator.login("Login", location="main")
+
+# Retrieve login status from session state
+authentication_status = st.session_state.get("authentication_status")
+name = st.session_state.get("name", "")
+username = st.session_state.get("username", "")
 
 if authentication_status is False:
     st.error("Username/password is incorrect")
