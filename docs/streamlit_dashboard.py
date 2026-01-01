@@ -33,24 +33,22 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar) with persistent button
 # -------------------------------------------------
-# -----------------------------
-# Show/Hide signup form button
-# -----------------------------
-if "show_signup" not in st.session_state:
-    st.session_state.show_signup = False
+# ------------------------------
+# Signup form (sidebar)
+# ------------------------------
+st.sidebar.header("User Access")
 
-if st.sidebar.button("Sign Up"):
-    st.session_state.show_signup = True
+show_signup = st.sidebar.button("Sign Up")
 
-if st.session_state.show_signup:
+if show_signup:
     st.sidebar.subheader("Create a New Account")
-
+    
     new_username = st.sidebar.text_input("National ID (numbers only)")
     new_name = st.sidebar.text_input("Full Name")
     new_password = st.sidebar.text_input("Password", type="password")
 
     if st.sidebar.button("Register"):
-        # Ensure the 'usernames' key exists
+        # Ensure the usernames dictionary exists
         if "usernames" not in credentials:
             credentials["usernames"] = {}
 
@@ -64,14 +62,19 @@ if st.session_state.show_signup:
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
-            # Add the user
+            # Hash the password
+            hashed_pw = stauth.Hasher([new_password]).generate()[0]
+
+            # Add new user
             credentials["usernames"][new_username] = {
                 "name": new_name,
-                "password": new_password
+                "password": hashed_pw
             }
+
+            # Save to YAML
             save_credentials(credentials)
+
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
-            st.session_state.show_signup = False  # hide signup form after registration
 
 
 # -------------------------------------------------
