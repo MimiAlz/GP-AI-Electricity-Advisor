@@ -33,15 +33,16 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar) with persistent button
 # -------------------------------------------------
-# -------------------------------------------------
-# Signup form (sidebar) – appears only when button clicked
-# -------------------------------------------------
-st.sidebar.header("User Access")
+# -----------------------------
+# Show/Hide signup form button
+# -----------------------------
+if "show_signup" not in st.session_state:
+    st.session_state.show_signup = False
 
-# Button to show signup form
-show_signup = st.sidebar.button("Sign Up")
+if st.sidebar.button("Sign Up"):
+    st.session_state.show_signup = True
 
-if show_signup:
+if st.session_state.show_signup:
     st.sidebar.subheader("Create a New Account")
 
     new_username = st.sidebar.text_input("National ID (numbers only)")
@@ -49,29 +50,28 @@ if show_signup:
     new_password = st.sidebar.text_input("Password", type="password")
 
     if st.sidebar.button("Register"):
-        # Ensure 'usernames' key exists
+        # Ensure the 'usernames' key exists
         if "usernames" not in credentials:
             credentials["usernames"] = {}
 
         # Validation
         if not new_username.isdigit():
             st.sidebar.error("Username must contain numbers only (national ID).")
-        elif len(new_username) != 10:  # adjust length per your national ID spec
+        elif len(new_username) != 10:
             st.sidebar.error("National ID must be exactly 10 digits.")
         elif new_username in credentials["usernames"]:
             st.sidebar.error("This national ID is already registered!")
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
-            # Add the user to credentials
+            # Add the user
             credentials["usernames"][new_username] = {
                 "name": new_name,
                 "password": new_password
             }
-
-            # Save to YAML
             save_credentials(credentials)
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+            st.session_state.show_signup = False  # hide signup form after registration
 
 
 # -------------------------------------------------
