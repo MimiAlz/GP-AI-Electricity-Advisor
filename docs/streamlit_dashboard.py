@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
-import os 
+import os
 
 # -------------------------------------------------
 # Page config
@@ -31,7 +31,6 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar)
 # -------------------------------------------------
-
 st.sidebar.header("User Access")
 
 signup_clicked = st.sidebar.checkbox("Sign Up")
@@ -48,37 +47,34 @@ if signup_clicked:
             st.sidebar.error("Username must contain numbers only (national ID).")
         elif len(new_username) != 10:  # adjust length as per your national ID spec
             st.sidebar.error("National ID must be exactly 10 digits.")
-        elif new_username in credentials["usernames"]:
+        elif new_username in credentials["credentials"]["usernames"]:
             st.sidebar.error("This national ID is already registered!")
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
             # Add the user
-            credentials["usernames"][new_username] = {
+            credentials["credentials"]["usernames"][new_username] = {
                 "name": new_name,
                 "password": new_password
             }
-            # Hash all passwords and save
-            credentials = stauth.Hasher().hash_passwords(credentials)
             save_credentials(credentials)
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
-
 
 # -------------------------------------------------
 # Authenticator instance
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
-    credentials,
-    cookie_name="power_dashboard",
-    key="auth",
-    cookie_expiry_days=1
+    credentials["credentials"],
+    credentials["cookie"]["name"],
+    credentials["cookie"]["key"],
+    cookie_expiry_days=credentials["cookie"]["expiry_days"],
+    preauthorized=None
 )
 
 # -------------------------------------------------
 # LOGIN
 # -------------------------------------------------
-authenticator.login(location="main", key="login_form")
-
+authenticator.login("Login", "main")
 auth_status = st.session_state.get("authentication_status")
 user_name = st.session_state.get("name")
 user_username = st.session_state.get("username")
@@ -103,6 +99,22 @@ authenticator.logout("Logout", "sidebar")
 st.title("⚡ Power Consumption Analytics Dashboard")
 
 # -------------------------------------------------
+# Appliance categories
+# -------------------------------------------------
+LOAD_CATEGORIES = {
+    "CDE": "Clothes Dryer",
+    "CWE": "Clothes Washer",
+    "DWE": "Dishwasher",
+    "FRE": "HVAC / Furnace (AC & Heater)",
+    "HPE": "Heat Pump",
+    "FGE": "Kitchen Fridge",
+    "HTE": "Instant Hot Water Unit",
+    "TVE": "Entertainment (TV/PVR/AMP)",
+    "Extra": "Additional / Miscellaneous",
+    "EV": "Electrical Vehicles"
+}
+
+# -------------------------------------------------
 # Mock Data Generators
 # -------------------------------------------------
 def generate_time_series(start, end, freq="15min"):
@@ -111,15 +123,10 @@ def generate_time_series(start, end, freq="15min"):
 def generate_house_data(house_id, start, end):
     time_index = generate_time_series(start, end)
     aggregate = np.random.uniform(0.5, 5.0, len(time_index))
-    df = pd.DataFrame({
-        "timestamp": time_index,
-        "aggregate": aggregate,
-        "HVAC": aggregate * np.random.uniform(0.3, 0.5),
-        "Lighting": aggregate * np.random.uniform(0.1, 0.2),
-        "Appliances": aggregate * np.random.uniform(0.2, 0.3),
-        "Other": aggregate * np.random.uniform(0.05, 0.15)
-    })
-    return df
+    data = {"timestamp": time_index, "aggregate": aggregate}
+    for code in LOAD_CATEGORIES:
+        data[code] = aggregate * np.random.uniform(0.05, 0.3, len(time_index))
+    return pd.DataFrame(data)
 
 def generate_area_data(area_id, start, end):
     time_index = generate_time_series(start, end)
@@ -153,47 +160,21 @@ end_date = st.sidebar.date_input("End Date", datetime.now())
 # -------------------------------------------------
 # SECTION 1 – House Load Disaggregation
 # -------------------------------------------------
-# -------------------------------------------------
-# SECTION 1 – House Load Disaggregation
-# -------------------------------------------------
 if section == "House Load Disaggregation":
     st.subheader("🏠 Aggregate vs Individual Load Consumption")
     house_id = st.sidebar.selectbox("House / Customer ID", ["House_001", "House_002", "House_003"])
     df = generate_house_data(house_id, start_date, end_date)
 
-    # Define categories
-    LOAD_CATEGORIES = {
-        "CDE": "Clothes Dryer",
-        "CWE": "Clothes Washer",
-        "DWE": "Dishwasher",
-        "FRE": "HVAC / Furnace (AC & Heater)",
-        "HPE": "Heat Pump",
-        "FGE": "Kitchen Fridge",
-        "HTE": "Instant Hot Water Unit",
-        "TVE": "Entertainment (TV/PVR/AMP)",
-        "Extra": "Additional / Miscellaneous",
-        "EV": "Electrical Vehicles"
-    }
-
-    # For demonstration, generate each category as a fraction of aggregate
-    for code in LOAD_CATEGORIES:
-        df[code] = df["aggregate"] * np.random.uniform(0.05, 0.3, len(df))
-
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Aggregate", line=dict(width=3)))
-    
-    # Plot each category
     for code, label in LOAD_CATEGORIES.items():
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df[code], name=label))
 
     fig.update_layout(
         title=f"House {house_id} – Aggregate & Load Consumption",
-        xaxis_title="Time",
-        yaxis_title="Power (kW)",
-        hovermode="x unified"
+        xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified"
     )
     st.plotly_chart(fig, use_container_width=True)
-
 
 # -------------------------------------------------
 # SECTION 2 – House Forecast
