@@ -28,9 +28,7 @@ def save_credentials(credentials):
 
 credentials = load_credentials()
 
-# -------------------------------------------------
-# Signup form (sidebar)
-# -------------------------------------------------
+
 # -------------------------------------------------
 # Signup form (sidebar) – button version
 # -------------------------------------------------
@@ -72,10 +70,12 @@ authenticator = stauth.Authenticate(
     preauthorized=None
 )
 
+
 # -------------------------------------------------
 # LOGIN
 # -------------------------------------------------
-authenticator.login("Login", "main")
+authenticator.login(location="main", key="login_form")
+
 auth_status = st.session_state.get("authentication_status")
 user_name = st.session_state.get("name")
 user_username = st.session_state.get("username")
@@ -88,6 +88,7 @@ elif auth_status is False:
 else:
     st.info("Please enter your username and password")
     st.stop()
+
 
 # -------------------------------------------------
 # LOGOUT
