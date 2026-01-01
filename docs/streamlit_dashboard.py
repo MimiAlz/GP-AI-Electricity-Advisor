@@ -31,34 +31,35 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar)
 # -------------------------------------------------
+# -------------------------------------------------
+# Signup form (sidebar) – button version
+# -------------------------------------------------
 st.sidebar.header("User Access")
 
-signup_clicked = st.sidebar.checkbox("Sign Up")
-if signup_clicked:
-    st.sidebar.subheader("Create a New Account")
-    
-    new_username = st.sidebar.text_input("National ID (numbers only)")
-    new_name = st.sidebar.text_input("Full Name")
-    new_password = st.sidebar.text_input("Password", type="password")
+st.sidebar.subheader("Create a New Account")
+new_username = st.sidebar.text_input("National ID (numbers only)")
+new_name = st.sidebar.text_input("Full Name")
+new_password = st.sidebar.text_input("Password", type="password")
 
-    if st.sidebar.button("Register"):
-        # Validation
-        if not new_username.isdigit():
-            st.sidebar.error("Username must contain numbers only (national ID).")
-        elif len(new_username) != 10:  # adjust length as per your national ID spec
-            st.sidebar.error("National ID must be exactly 10 digits.")
-        elif new_username in credentials["credentials"]["usernames"]:
-            st.sidebar.error("This national ID is already registered!")
-        elif not new_name or not new_password:
-            st.sidebar.error("Full name and password are required!")
-        else:
-            # Add the user
-            credentials["credentials"]["usernames"][new_username] = {
-                "name": new_name,
-                "password": new_password
-            }
-            save_credentials(credentials)
-            st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+if st.sidebar.button("Sign Up"):
+    # Validation
+    if not new_username.isdigit():
+        st.sidebar.error("Username must contain numbers only (national ID).")
+    elif len(new_username) != 10:  # adjust length as per your national ID spec
+        st.sidebar.error("National ID must be exactly 10 digits.")
+    elif new_username in credentials["credentials"]["usernames"]:
+        st.sidebar.error("This national ID is already registered!")
+    elif not new_name or not new_password:
+        st.sidebar.error("Full name and password are required!")
+    else:
+        # Add the user
+        credentials["credentials"]["usernames"][new_username] = {
+            "name": new_name,
+            "password": new_password
+        }
+        save_credentials(credentials)
+        st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+
 
 # -------------------------------------------------
 # Authenticator instance
