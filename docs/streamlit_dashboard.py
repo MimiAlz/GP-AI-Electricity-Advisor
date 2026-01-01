@@ -22,12 +22,11 @@ st.set_page_config(
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
 def load_credentials():
-    if not os.path.exists(CREDENTIALS_FILE):
-        # create default empty credentials if file doesn't exist
-        with open(CREDENTIALS_FILE, "w") as f:
-            yaml.dump({"credentials": {"usernames": {}}}, f)
-    with open(CREDENTIALS_FILE, "r") as file:
-        return yaml.load(file, Loader=SafeLoader)
+    if os.path.exists(CREDENTIALS_FILE):
+        with open(CREDENTIALS_FILE, "r") as file:
+            return yaml.load(file, Loader=SafeLoader) or {"usernames": {}}
+    else:
+        return {"usernames": {}}
 
 def save_credentials(credentials):
     with open(CREDENTIALS_FILE, "w") as file:
@@ -36,67 +35,57 @@ def save_credentials(credentials):
 credentials = load_credentials()
 
 # -------------------------------------------------
-# Sidebar Signup form
-# -------------------------------------------------
-st.sidebar.header("Sign Up (New User)")
-signup_name = st.sidebar.text_input("Full Name", key="signup_name")
-signup_national_id = st.sidebar.text_input("National ID (numbers only)", key="signup_id")
-signup_password = st.sidebar.text_input("Password", type="password", key="signup_password")
-signup_button = st.sidebar.button("Sign Up", key="signup_button")
-
-if signup_button:
-    if not signup_national_id.isdigit():
-        st.sidebar.error("National ID must contain only numbers!")
-    elif signup_national_id in credentials["credentials"]["usernames"]:
-        st.sidebar.error("User already exists!")
-    else:
-        hashed_password = stauth.Hasher([signup_password]).generate()[0]
-        credentials["credentials"]["usernames"][signup_national_id] = {
-            "name": signup_name,
-            "password": hashed_password
-        }
-        save_credentials(credentials)
-        st.sidebar.success(f"User {signup_name} created! You can now log in.")
-
-# -------------------------------------------------
 # Authenticator
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
-    credentials["credentials"],
+    credentials,
     cookie_name="power_dashboard",
     key="auth",
     cookie_expiry_days=1
 )
 
 # -------------------------------------------------
-# Sidebar Login
+# Signup form
+# -------------------------------------------------
+st.sidebar.header("Sign Up (New User)")
+full_name_input = st.sidebar.text_input("Full Name", key="signup_name")
+username_input = st.sidebar.text_input("National ID (numbers only)", key="signup_id")
+password_input = st.sidebar.text_input("Password", type="password", key="signup_pw")
+signup_button = st.sidebar.button("Sign Up")
+
+if signup_button:
+    # Basic validations
+    if not username_input.isdigit():
+        st.sidebar.error("Username must be numeric (National ID).")
+    elif full_name_input.strip() == "" or password_input.strip() == "":
+        st.sidebar.error("Please fill in all fields.")
+    elif username_input in credentials["usernames"]:
+        st.sidebar.error("This National ID already exists. Please log in.")
+    else:
+        # Hash password and add to credentials
+        hashed_pw = stauth.Hasher([password_input]).generate()[0]
+        credentials["usernames"][username_input] = {
+            "name": full_name_input,
+            "password": hashed_pw
+        }
+        save_credentials(credentials)
+        st.sidebar.success("User registered successfully! You can now log in.")
+
+# -------------------------------------------------
+# Login form
 # -------------------------------------------------
 st.sidebar.header("User Login")
-username_input = st.sidebar.text_input("National ID", key="login_username")
-password_input = st.sidebar.text_input("Password", type="password", key="login_password")
-login_button = st.sidebar.button("Log In", key="login_button")
+name, authentication_status, username = authenticator.login("Login", location="sidebar")
 
-if login_button:
-    if username_input in credentials["credentials"]["usernames"]:
-        user = credentials["credentials"]["usernames"][username_input]
-        if stauth.Hasher().check_password(password_input, user["password"]):
-            st.session_state["authentication_status"] = True
-            st.session_state["name"] = user["name"]
-            st.session_state["username"] = username_input
-            st.success(f"Welcome {user['name']}")
-        else:
-            st.session_state["authentication_status"] = False
-            st.error("Incorrect password")
-    else:
-        st.session_state["authentication_status"] = False
-        st.error("User not found")
-
-# Stop execution if not authenticated
-if not st.session_state.get("authentication_status"):
-    st.stop()
+if authentication_status:
+    st.success(f"Welcome {name}")
+elif authentication_status is False:
+    st.error("Username/password is incorrect")
+else:
+    st.info("Please enter your username and password")
 
 # -------------------------------------------------
-# Logout button
+# Logout
 # -------------------------------------------------
 authenticator.logout("Logout", "sidebar")
 
@@ -144,12 +133,10 @@ def generate_forecast(df, horizon_hours=24):
     last_time = df["timestamp"].iloc[-1]
     future_index = pd.date_range(
         start=last_time + timedelta(minutes=15),
-        periods=horizon_hours * 4,
+        periods=horizon_hours*4,
         freq="15min"
     )
-    forecast = df["aggregate"].iloc[-1] + np.cumsum(
-        np.random.normal(0, 0.05, len(future_index))
-    )
+    forecast = df["aggregate"].iloc[-1] + np.cumsum(np.random.normal(0, 0.05, len(future_index)))
     return pd.DataFrame({"timestamp": future_index, "forecast": forecast})
 
 # -------------------------------------------------
@@ -170,12 +157,19 @@ if section == "House Load Disaggregation":
     st.subheader("🏠 Aggregate vs Individual Load Consumption")
     house_id = st.sidebar.selectbox("House / Customer ID", ["House_001", "House_002", "House_003"])
     df = generate_house_data(house_id, start_date, end_date)
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Aggregate", line=dict(width=3)))
+
     for code, label in LOAD_CATEGORIES.items():
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df[code], name=label))
-    fig.update_layout(title=f"House {house_id} – Aggregate & Load Consumption",
-                      xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+
+    fig.update_layout(
+        title=f"House {house_id} – Aggregate & Load Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------------------------------
@@ -186,11 +180,17 @@ elif section == "House Consumption Forecast":
     house_id = st.sidebar.selectbox("House / Customer ID", ["House_001", "House_002", "House_003"])
     df = generate_house_data(house_id, start_date, end_date)
     forecast_df = generate_forecast(df)
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Historical"))
     fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"], name="Forecast", line=dict(dash="dash")))
-    fig.update_layout(title=f"House {house_id} – Historical & Forecasted Consumption",
-                      xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+
+    fig.update_layout(
+        title=f"House {house_id} – Historical & Forecasted Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------------------------------
@@ -201,9 +201,15 @@ elif section == "Area Consumption Forecast":
     area_id = st.sidebar.selectbox("Area ID", ["Area_A", "Area_B", "Area_C"])
     df = generate_area_data(area_id, start_date, end_date)
     forecast_df = generate_forecast(df)
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Historical Area Consumption"))
     fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"], name="Forecast", line=dict(dash="dash")))
-    fig.update_layout(title=f"Area {area_id} – Historical & Forecasted Consumption",
-                      xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+
+    fig.update_layout(
+        title=f"Area {area_id} – Historical & Forecasted Consumption",
+        xaxis_title="Time",
+        yaxis_title="Power (kW)",
+        hovermode="x unified"
+    )
     st.plotly_chart(fig, use_container_width=True)
