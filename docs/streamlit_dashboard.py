@@ -79,7 +79,7 @@ login_button = st.sidebar.button("Log In", key="login_button")
 if login_button:
     if username_input in credentials["credentials"]["usernames"]:
         user = credentials["credentials"]["usernames"][username_input]
-        if stauth.Hasher([]).check_password(password_input, user["password"]):
+        if stauth.Hasher().check_password(password_input, user["password"]):
             st.session_state["authentication_status"] = True
             st.session_state["name"] = user["name"]
             st.session_state["username"] = username_input
