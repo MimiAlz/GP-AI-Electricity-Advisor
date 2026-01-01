@@ -31,18 +31,25 @@ credentials = load_credentials()
 
 
 # -------------------------------------------------
-# Signup form (sidebar)
+# Signup form (sidebar) with persistent button
 # -------------------------------------------------
 st.sidebar.header("User Access")
 
-# Display the signup form only when the "Sign Up" button is clicked
-signup_clicked = st.sidebar.button("Sign Up")
-if signup_clicked:
+# Initialize session state
+if "show_signup_form" not in st.session_state:
+    st.session_state.show_signup_form = False
+
+# When the button is clicked, toggle the signup form visibility
+if st.sidebar.button("Sign Up"):
+    st.session_state.show_signup_form = True
+
+# Display signup form if session state says so
+if st.session_state.show_signup_form:
     st.sidebar.subheader("Create a New Account")
 
-    new_username = st.sidebar.text_input("National ID (numbers only)")
-    new_name = st.sidebar.text_input("Full Name")
-    new_password = st.sidebar.text_input("Password", type="password")
+    new_username = st.sidebar.text_input("National ID (numbers only)", key="signup_username")
+    new_name = st.sidebar.text_input("Full Name", key="signup_name")
+    new_password = st.sidebar.text_input("Password", type="password", key="signup_password")
 
     if st.sidebar.button("Register"):
         # Validation
@@ -64,6 +71,8 @@ if signup_clicked:
             credentials = stauth.Hasher().hash_passwords(credentials)
             save_credentials(credentials)
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+            # Optionally hide the signup form after registration
+            st.session_state.show_signup_form = False
 
 
 
