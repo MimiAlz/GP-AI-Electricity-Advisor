@@ -80,10 +80,12 @@ with st.sidebar.expander("Create new account"):
 # -------------------------------------------------
 # Sidebar login
 # -------------------------------------------------
+
 st.sidebar.header("User Login")
-username_input = st.sidebar.text_input("National ID")
-password_input = st.sidebar.text_input("Password", type="password")
-login_button = st.sidebar.button("Log In")
+username_input = st.sidebar.text_input("National ID", key="login_username")
+password_input = st.sidebar.text_input("Password", type="password", key="login_password")
+login_button = st.sidebar.button("Log In", key="login_button")
+
 
 if login_button:
     authenticated, name = authenticate(username_input, password_input)
