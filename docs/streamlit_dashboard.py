@@ -33,47 +33,45 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar) with persistent button
 # -------------------------------------------------
+# -------------------------------------------------
+# Signup form (sidebar) – appears only when button clicked
+# -------------------------------------------------
 st.sidebar.header("User Access")
 
-# Initialize session state
-if "show_signup_form" not in st.session_state:
-    st.session_state.show_signup_form = False
+# Button to show signup form
+show_signup = st.sidebar.button("Sign Up")
 
-# When the button is clicked, toggle the signup form visibility
-if st.sidebar.button("Sign Up"):
-    st.session_state.show_signup_form = True
-
-# Display signup form if session state says so
-if st.session_state.show_signup_form:
+if show_signup:
     st.sidebar.subheader("Create a New Account")
 
-    new_username = st.sidebar.text_input("National ID (numbers only)", key="signup_username")
-    new_name = st.sidebar.text_input("Full Name", key="signup_name")
-    new_password = st.sidebar.text_input("Password", type="password", key="signup_password")
+    new_username = st.sidebar.text_input("National ID (numbers only)")
+    new_name = st.sidebar.text_input("Full Name")
+    new_password = st.sidebar.text_input("Password", type="password")
 
     if st.sidebar.button("Register"):
+        # Ensure 'usernames' key exists
+        if "usernames" not in credentials:
+            credentials["usernames"] = {}
+
         # Validation
         if not new_username.isdigit():
             st.sidebar.error("Username must contain numbers only (national ID).")
-        elif len(new_username) != 10:  # adjust length as per your national ID spec
+        elif len(new_username) != 10:  # adjust length per your national ID spec
             st.sidebar.error("National ID must be exactly 10 digits.")
         elif new_username in credentials["usernames"]:
             st.sidebar.error("This national ID is already registered!")
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
-            # Add the user
+            # Add the user to credentials
             credentials["usernames"][new_username] = {
                 "name": new_name,
                 "password": new_password
             }
-            # Hash passwords if using streamlit_authenticator hashing
-            credentials = stauth.Hasher().hash_passwords(credentials)
+
+            # Save to YAML
             save_credentials(credentials)
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
-            # Optionally hide the signup form after registration
-            st.session_state.show_signup_form = False
-
 
 
 # -------------------------------------------------
