@@ -33,48 +33,48 @@ credentials = load_credentials()
 # -------------------------------------------------
 # Signup form (sidebar) with persistent button
 # -------------------------------------------------
-# ------------------------------
-# Signup form (sidebar)
-# ------------------------------
+# -------------------------------------------------
+# Signup form (sidebar) – appears only when button pressed
+# -------------------------------------------------
 st.sidebar.header("User Access")
 
-show_signup = st.sidebar.button("Sign Up")
+if st.sidebar.button("Sign Up"):
+    st.session_state.show_signup = True
 
-if show_signup:
+if st.session_state.get("show_signup", False):
     st.sidebar.subheader("Create a New Account")
     
-    new_username = st.sidebar.text_input("National ID (numbers only)")
-    new_name = st.sidebar.text_input("Full Name")
-    new_password = st.sidebar.text_input("Password", type="password")
+    new_username = st.sidebar.text_input("National ID (numbers only)", key="new_username")
+    new_name = st.sidebar.text_input("Full Name", key="new_name")
+    new_password = st.sidebar.text_input("Password", type="password", key="new_password")
 
     if st.sidebar.button("Register"):
-        # Ensure the usernames dictionary exists
-        if "usernames" not in credentials:
-            credentials["usernames"] = {}
-
         # Validation
         if not new_username.isdigit():
             st.sidebar.error("Username must contain numbers only (national ID).")
-        elif len(new_username) != 10:
+        elif len(new_username) != 10:  # adjust as per your national ID spec
             st.sidebar.error("National ID must be exactly 10 digits.")
         elif new_username in credentials["usernames"]:
             st.sidebar.error("This national ID is already registered!")
         elif not new_name or not new_password:
             st.sidebar.error("Full name and password are required!")
         else:
-            # Hash the password
-            hashed_pw = stauth.Hasher([new_password]).generate()[0]
+            # Hash the new password only
+            hashed_password = stauth.Hasher([new_password]).generate()[0]
 
             # Add new user
             credentials["usernames"][new_username] = {
                 "name": new_name,
-                "password": hashed_pw
+                "password": hashed_password
             }
 
             # Save to YAML
-            save_credentials(credentials)
+            with open(CREDENTIALS_FILE, "w") as file:
+                yaml.dump(credentials, file)
 
             st.sidebar.success(f"Account created for {new_name}. You can now log in.")
+            st.session_state.show_signup = False  # hide form after successful signup
+
 
 
 # -------------------------------------------------
