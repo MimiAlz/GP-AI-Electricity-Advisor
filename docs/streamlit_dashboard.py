@@ -83,11 +83,12 @@ if st.session_state.show_signup:
 # Authenticator instance
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
-    credentials,
-    cookie_name="power_dashboard",
-    key="auth",
-    cookie_expiry_days=1
+    credentials=credentials["credentials"],  # <--- only pass the 'credentials' part
+    cookie_name=credentials["cookie"]["name"],
+    key=credentials["cookie"]["key"],
+    cookie_expiry_days=credentials["cookie"]["expiry_days"]
 )
+
 
 
 # -------------------------------------------------
