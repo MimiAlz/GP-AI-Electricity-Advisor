@@ -9,36 +9,36 @@ import streamlit_authenticator as stauth
 import os
 import re
 
-# -------------------------------------------------
-# Page config
-# -------------------------------------------------
+# ------------------------------
+# Page Config
+# ------------------------------
 st.set_page_config(
     page_title="Power Consumption Dashboard",
     layout="wide"
 )
 
-# -------------------------------------------------
-# Credentials file
-# -------------------------------------------------
+# ------------------------------
+# Credentials File
+# ------------------------------
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.yaml")
 
 def load_credentials():
     if not os.path.exists(CREDENTIALS_FILE):
-        # create empty structure if file does not exist
+        # Create empty structure if missing
         with open(CREDENTIALS_FILE, "w") as f:
             yaml.dump({"credentials": {"usernames": {}}}, f)
-    with open(CREDENTIALS_FILE, "r") as file:
-        return yaml.load(file, Loader=SafeLoader)
+    with open(CREDENTIALS_FILE, "r") as f:
+        return yaml.load(f, Loader=SafeLoader)
 
 def save_credentials(credentials):
-    with open(CREDENTIALS_FILE, "w") as file:
-        yaml.dump(credentials, file)
+    with open(CREDENTIALS_FILE, "w") as f:
+        yaml.dump(credentials, f)
 
 credentials = load_credentials()
 
-# -------------------------------------------------
-# Signup form
-# -------------------------------------------------
+# ------------------------------
+# Signup Form (Sidebar)
+# ------------------------------
 st.sidebar.header("Sign Up")
 with st.sidebar.form("signup_form"):
     new_username = st.text_input("National ID (numbers only)")
@@ -48,44 +48,43 @@ with st.sidebar.form("signup_form"):
 
     if signup_btn:
         if not re.fullmatch(r"\d+", new_username):
-            st.error("Username must contain numbers only (National ID).")
+            st.error("Username must be numbers only (National ID).")
         elif new_username in credentials["credentials"]["usernames"]:
             st.error("This National ID is already registered.")
         elif len(new_password) < 6:
             st.error("Password must be at least 6 characters.")
         else:
-            # Add user
+            # Add user to dictionary
             credentials["credentials"]["usernames"][new_username] = {
                 "name": new_name,
                 "password": new_password
             }
-            # Hash passwords
+            # Hash all passwords
             hashed = stauth.Hasher(
                 [u["password"] for u in credentials["credentials"]["usernames"].values()]
             ).generate()
-
             for i, key in enumerate(credentials["credentials"]["usernames"].keys()):
                 credentials["credentials"]["usernames"][key]["password"] = hashed[i]
-
+            # Save
             save_credentials(credentials)
             st.success("Account created! You can now log in.")
 
-# -------------------------------------------------
+# ------------------------------
 # Authenticator
-# -------------------------------------------------
+# ------------------------------
 authenticator = stauth.Authenticate(
-    credentials["credentials"],  # usernames/passwords
+    credentials["credentials"],
     cookie_name="power_dashboard",
     key="auth",
     cookie_expiry_days=1
 )
 
-# -------------------------------------------------
-# LOGIN (new syntax)
-# -------------------------------------------------
+# ------------------------------
+# LOGIN
+# ------------------------------
 authenticator.login("Login", location="main")
 
-# Retrieve login status from session state
+# Retrieve login status from session_state
 authentication_status = st.session_state.get("authentication_status")
 name = st.session_state.get("name", "")
 username = st.session_state.get("username", "")
@@ -100,15 +99,14 @@ elif authentication_status is True:
     authenticator.logout("Logout", location="sidebar")
     st.success(f"Welcome {name}")
 
-    # =================================================
-    # 🔽 🔽 🔽 YOUR DASHBOARD STARTS HERE 🔽 🔽 🔽
-    # =================================================
-
+    # ------------------------------
+    # Dashboard Title
+    # ------------------------------
     st.title("⚡ Power Consumption Analytics Dashboard")
 
-    # -------------------------------------------------
+    # ------------------------------
     # Appliance categories
-    # -------------------------------------------------
+    # ------------------------------
     LOAD_CATEGORIES = {
         "CDE": "Clothes Dryer",
         "CWE": "Clothes Washer",
@@ -122,9 +120,9 @@ elif authentication_status is True:
         "EV": "Electrical Vehicles"
     }
 
-    # -------------------------------------------------
+    # ------------------------------
     # Mock Data Generators
-    # -------------------------------------------------
+    # ------------------------------
     def generate_time_series(start, end, freq="15min"):
         return pd.date_range(start=start, end=end, freq=freq)
 
@@ -153,11 +151,10 @@ elif authentication_status is True:
         )
         return pd.DataFrame({"timestamp": future_index, "forecast": forecast})
 
-    # -------------------------------------------------
+    # ------------------------------
     # Sidebar controls
-    # -------------------------------------------------
+    # ------------------------------
     st.sidebar.header("Controls")
-
     section = st.sidebar.radio(
         "Select Analysis Type",
         [
@@ -177,9 +174,9 @@ elif authentication_status is True:
         datetime.now()
     )
 
-    # -------------------------------------------------
+    # ------------------------------
     # SECTION 1 – House Load Disaggregation
-    # -------------------------------------------------
+    # ------------------------------
     if section == "House Load Disaggregation":
         st.subheader("🏠 Aggregate vs Individual Load Consumption")
         house_id = st.sidebar.selectbox(
@@ -191,13 +188,17 @@ elif authentication_status is True:
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Aggregate", line=dict(width=3)))
         for code, label in LOAD_CATEGORIES.items():
             fig.add_trace(go.Scatter(x=df["timestamp"], y=df[code], name=label))
-        fig.update_layout(title=f"House {house_id} – Aggregate & Load Consumption",
-                          xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+        fig.update_layout(
+            title=f"House {house_id} – Aggregate & Load Consumption",
+            xaxis_title="Time",
+            yaxis_title="Power (kW)",
+            hovermode="x unified"
+        )
         st.plotly_chart(fig, use_container_width=True)
 
-    # -------------------------------------------------
+    # ------------------------------
     # SECTION 2 – House Forecast
-    # -------------------------------------------------
+    # ------------------------------
     elif section == "House Consumption Forecast":
         st.subheader("📈 House-Level Forecast")
         house_id = st.sidebar.selectbox(
@@ -209,13 +210,17 @@ elif authentication_status is True:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Historical"))
         fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"], name="Forecast", line=dict(dash="dash")))
-        fig.update_layout(title=f"House {house_id} – Historical & Forecasted Consumption",
-                          xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+        fig.update_layout(
+            title=f"House {house_id} – Historical & Forecasted Consumption",
+            xaxis_title="Time",
+            yaxis_title="Power (kW)",
+            hovermode="x unified"
+        )
         st.plotly_chart(fig, use_container_width=True)
 
-    # -------------------------------------------------
+    # ------------------------------
     # SECTION 3 – Area Forecast
-    # -------------------------------------------------
+    # ------------------------------
     elif section == "Area Consumption Forecast":
         st.subheader("🌍 Area-Level Forecast")
         area_id = st.sidebar.selectbox(
@@ -227,6 +232,10 @@ elif authentication_status is True:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name="Historical Area Consumption"))
         fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"], name="Forecast", line=dict(dash="dash")))
-        fig.update_layout(title=f"Area {area_id} – Historical & Forecasted Consumption",
-                          xaxis_title="Time", yaxis_title="Power (kW)", hovermode="x unified")
+        fig.update_layout(
+            title=f"Area {area_id} – Historical & Forecasted Consumption",
+            xaxis_title="Time",
+            yaxis_title="Power (kW)",
+            hovermode="x unified"
+        )
         st.plotly_chart(fig, use_container_width=True)
