@@ -131,6 +131,32 @@ st.sidebar.radio(
 )
 LANG = st.session_state.lang
 apply_language_css(LANG)
+if LANG == "ar":
+    st.markdown("""
+    <style>
+    label:has(+ input[type="text"])::before {
+        content: "الرقم الوطني";
+        display: block;
+        font-weight: 600;
+    }
+    label:has(+ input[type="text"]) {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+    label:has(+ input[type="text"])::before {
+        content: "National ID";
+        display: block;
+        font-weight: 600;
+    }
+    label:has(+ input[type="text"]) {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # -----------------------------
 # YAML credentials
