@@ -175,12 +175,13 @@ authenticator.login(location="main",key="login_form")
 if LANG == "ar":
     st.markdown("""
     <style>
-    /* Hide label ONLY for username (text input) */
+    /* Scope ONLY to authenticator login form */
+    form[data-testid="stForm"] 
     div[data-testid="stTextInput"]:has(input[type="text"]) label {
         display: none;
     }
 
-    /* Replace with Arabic National ID */
+    form[data-testid="stForm"] 
     div[data-testid="stTextInput"]:has(input[type="text"])::before {
         content: "الرقم الوطني";
         display: block;
@@ -194,12 +195,12 @@ if LANG == "ar":
 else:
     st.markdown("""
     <style>
-    /* Hide label ONLY for username (text input) */
+    form[data-testid="stForm"] 
     div[data-testid="stTextInput"]:has(input[type="text"]) label {
         display: none;
     }
 
-    /* Replace with English National ID */
+    form[data-testid="stForm"] 
     div[data-testid="stTextInput"]:has(input[type="text"])::before {
         content: "National ID";
         display: block;
@@ -209,6 +210,7 @@ else:
     }
     </style>
     """, unsafe_allow_html=True)
+
 
 
 
