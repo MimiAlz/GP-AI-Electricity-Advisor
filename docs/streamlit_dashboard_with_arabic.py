@@ -170,46 +170,29 @@ authenticator = stauth.Authenticate(
     key=credentials["cookie"]["key"],
     cookie_expiry_days=credentials["cookie"]["expiry_days"]
 )
-authenticator.login(location="main",key="login_form")
 
 if LANG == "ar":
-    st.markdown("""
-    <style>
-    /* Hide Username label (login only) */
-    input[aria-label="Username"] + div label {
-        display: none;
-    }
-
-    /* Replace with Arabic National ID */
-    input[aria-label="Username"] + div::before {
-        content: "الرقم الوطني";
-        display: block;
-        font-weight: 600;
-        margin-bottom: 4px;
-        text-align: right;
-        direction: rtl;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        "<h4 style='text-align:right; direction:rtl;'>تسجيل الدخول باستخدام الرقم الوطني</h4>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='text-align:right; direction:rtl; color:gray;'>اسم المستخدم = الرقم الوطني (10 أرقام)</p>",
+        unsafe_allow_html=True
+    )
 else:
-    st.markdown("""
-    <style>
-    /* Hide Username label (login only) */
-    input[aria-label="Username"] + div label {
-        display: none;
-    }
+    st.markdown("### Login using your National ID")
+    st.caption("Username = National ID (10 digits)")
 
-    /* Replace with English National ID */
-    input[aria-label="Username"] + div::before {
-        content: "National ID";
-        display: block;
-        font-weight: 600;
-        margin-bottom: 4px;
-        text-align: left;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+authenticator.login(location="main",key="login_form")
 
+username = st.session_state.get("username")
+auth_status = st.session_state.get("authentication_status")
+
+if auth_status:
+    if not (username and username.isdigit() and len(username) == 10):
+        st.error("Invalid National ID format.")
+        st.stop()
 
 
 
