@@ -92,11 +92,26 @@ TEXT = {
 }
 
 # -------------------------------------------------
+# Appliance categories (EN + AR)
+# -------------------------------------------------
+LOAD_CATEGORIES = {
+    "CDE": {"en": "Clothes Dryer", "ar": "نشافة الملابس"},
+    "CWE": {"en": "Clothes Washer", "ar": "غسالة الملابس"},
+    "DWE": {"en": "Dishwasher", "ar": "غسالة الصحون"},
+    "FRE": {"en": "HVAC / Furnace", "ar": "نظام التدفئة والتكييف"},
+    "HPE": {"en": "Heat Pump", "ar": "مضخة حرارية"},
+    "FGE": {"en": "Kitchen Fridge", "ar": "ثلاجة المطبخ"},
+    "HTE": {"en": "Instant Hot Water", "ar": "سخان مياه فوري"},
+    "TVE": {"en": "Entertainment", "ar": "أجهزة الترفيه"},
+    "Extra": {"en": "Miscellaneous", "ar": "أحمال إضافية"},
+    "EV": {"en": "Electric Vehicle", "ar": "مركبة كهربائية"}
+}
+
+# -------------------------------------------------
 # Page config
 # -------------------------------------------------
 st.set_page_config(page_title=TEXT[LANG]["page_title"], layout="wide")
 
-# RTL support for Arabic
 if LANG == "ar":
     st.markdown(
         """
@@ -139,7 +154,6 @@ if st.sidebar.button(TEXT[LANG]["signup"]):
 
 if st.session_state.show_signup:
     st.sidebar.subheader(TEXT[LANG]["create_account"])
-
     new_username = st.sidebar.text_input(TEXT[LANG]["national_id"])
     new_name = st.sidebar.text_input(TEXT[LANG]["full_name"])
     new_password = st.sidebar.text_input(TEXT[LANG]["password"], type="password")
@@ -185,22 +199,6 @@ authenticator.logout(TEXT[LANG]["logout"], "sidebar")
 st.title(TEXT[LANG]["dashboard_title"])
 
 # -------------------------------------------------
-# Appliance categories
-# -------------------------------------------------
-LOAD_CATEGORIES = {
-    "CDE": "Clothes Dryer",
-    "CWE": "Clothes Washer",
-    "DWE": "Dishwasher",
-    "FRE": "HVAC / Furnace",
-    "HPE": "Heat Pump",
-    "FGE": "Kitchen Fridge",
-    "HTE": "Instant Hot Water",
-    "TVE": "Entertainment",
-    "Extra": "Miscellaneous",
-    "EV": "Electric Vehicle"
-}
-
-# -------------------------------------------------
 # Mock data generators (UNCHANGED)
 # -------------------------------------------------
 def generate_time_series(start, end, freq="15min"):
@@ -221,9 +219,14 @@ def generate_area_data(area_id, start, end):
 
 def generate_forecast(df, horizon_hours=24):
     last_time = df["timestamp"].iloc[-1]
-    future_index = pd.date_range(start=last_time + timedelta(minutes=15),
-                                 periods=horizon_hours * 4, freq="15min")
-    forecast = df["aggregate"].iloc[-1] + np.cumsum(np.random.normal(0, 0.05, len(future_index)))
+    future_index = pd.date_range(
+        start=last_time + timedelta(minutes=15),
+        periods=horizon_hours * 4,
+        freq="15min"
+    )
+    forecast = df["aggregate"].iloc[-1] + np.cumsum(
+        np.random.normal(0, 0.05, len(future_index))
+    )
     return pd.DataFrame({"timestamp": future_index, "forecast": forecast})
 
 # -------------------------------------------------
@@ -252,11 +255,19 @@ if section == TEXT[LANG]["house_disagg"]:
     df = generate_house_data(house_id, start_date, end_date)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"],
-                             name=TEXT[LANG]["aggregate"], line=dict(width=3)))
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name=TEXT[LANG]["aggregate"],
+        line=dict(width=3)
+    ))
 
-    for code, label in LOAD_CATEGORIES.items():
-        fig.add_trace(go.Scatter(x=df["timestamp"], y=df[code], name=label))
+    for code, labels in LOAD_CATEGORIES.items():
+        fig.add_trace(go.Scatter(
+            x=df["timestamp"],
+            y=df[code],
+            name=labels[LANG]
+        ))
 
     fig.update_layout(
         title=f"{house_id} – {TEXT[LANG]['house_section']}",
@@ -276,9 +287,17 @@ elif section == TEXT[LANG]["house_forecast"]:
     forecast_df = generate_forecast(df)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"], name=TEXT[LANG]["historical"]))
-    fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"],
-                             name=TEXT[LANG]["forecast"], line=dict(dash="dash")))
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name=TEXT[LANG]["historical"]
+    ))
+    fig.add_trace(go.Scatter(
+        x=forecast_df["timestamp"],
+        y=forecast_df["forecast"],
+        name=TEXT[LANG]["forecast"],
+        line=dict(dash="dash")
+    ))
 
     fig.update_layout(
         title=f"{house_id} – {TEXT[LANG]['house_forecast_title']}",
@@ -298,10 +317,17 @@ elif section == TEXT[LANG]["area_forecast"]:
     forecast_df = generate_forecast(df)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["aggregate"],
-                             name=TEXT[LANG]["historical"]))
-    fig.add_trace(go.Scatter(x=forecast_df["timestamp"], y=forecast_df["forecast"],
-                             name=TEXT[LANG]["forecast"], line=dict(dash="dash")))
+    fig.add_trace(go.Scatter(
+        x=df["timestamp"],
+        y=df["aggregate"],
+        name=TEXT[LANG]["historical"]
+    ))
+    fig.add_trace(go.Scatter(
+        x=forecast_df["timestamp"],
+        y=forecast_df["forecast"],
+        name=TEXT[LANG]["forecast"],
+        line=dict(dash="dash")
+    ))
 
     fig.update_layout(
         title=f"{area_id} – {TEXT[LANG]['area_forecast_title']}",
