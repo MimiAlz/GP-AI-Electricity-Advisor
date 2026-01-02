@@ -9,11 +9,20 @@ from yaml.loader import SafeLoader
 import os
 
 # -----------------------------
-# Language & RTL
+# Page config
 # -----------------------------
 if "lang" not in st.session_state:
     st.session_state.lang = "en"
 
+st.set_page_config(
+    page_title="Power Consumption Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# -----------------------------
+# Language & RTL
+# -----------------------------
 def apply_language_css(lang):
     if lang == "ar":
         st.markdown("""
@@ -32,7 +41,7 @@ def apply_language_css(lang):
         """, unsafe_allow_html=True)
 
 def to_arabic_digits(val):
-    return str(val).translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))
+    return str(val).translate(str.maketrans("0123456789","٠١٢٣٤٥٦٧٨٩"))
 
 LANG = st.session_state.lang
 apply_language_css(LANG)
@@ -121,6 +130,7 @@ st.sidebar.radio(
     )
 )
 LANG = st.session_state.lang
+apply_language_css(LANG)
 
 # -----------------------------
 # YAML credentials
@@ -189,21 +199,23 @@ LOAD_CATEGORIES = {
 }
 
 # -----------------------------
-# Data generation
+# Data generation functions
 # -----------------------------
 def generate_time_series(start,end,freq="15min"):
     return pd.date_range(start=start,end=end,freq=freq)
+
 def generate_house_data(house_id,start,end):
     t=generate_time_series(start,end)
     agg=np.random.uniform(0.5,5.0,len(t))
     data={"timestamp":t,"aggregate":agg}
-    for k in LOAD_CATEGORIES:
-        data[k]=agg*np.random.uniform(0.05,0.3,len(t))
+    for k in LOAD_CATEGORIES: data[k]=agg*np.random.uniform(0.05,0.3,len(t))
     return pd.DataFrame(data)
+
 def generate_area_data(area_id,start,end):
     t=generate_time_series(start,end)
     agg=np.random.uniform(50,200,len(t))
     return pd.DataFrame({"timestamp":t,"aggregate":agg})
+
 def generate_forecast(df,horizon_hours=24):
     last_time=df["timestamp"].iloc[-1]
     future_index=pd.date_range(start=last_time+timedelta(minutes=15),periods=horizon_hours*4,freq="15min")
@@ -211,7 +223,7 @@ def generate_forecast(df,horizon_hours=24):
     return pd.DataFrame({"timestamp":future_index,"forecast":forecast})
 
 # -----------------------------
-# Sidebar controls with Arabic numerals
+# Sidebar controls
 # -----------------------------
 st.sidebar.header(TEXT[LANG]["controls"])
 start_val = datetime.now()-timedelta(days=7)
@@ -243,7 +255,7 @@ if section==TEXT[LANG]["house_disagg"]:
     for code,labels in LOAD_CATEGORIES.items():
         hover_text=df.apply(lambda row:f"{labels[LANG]}<br>{TEXT[LANG]['power']}: {format_hover_value(row[code])}",axis=1)
         fig.add_trace(go.Scatter(x=df["timestamp"],y=df[code],name=labels[LANG],hovertext=hover_text,hoverinfo="text"))
-    fig.update_layout(title=f"{house_id} – {TEXT[LANG]['house_section']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
+    fig.update_layout(height=600,autosize=True,margin=dict(l=60,r=60,t=80,b=60),title=f"{house_id} – {TEXT[LANG]['house_section']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
     st.plotly_chart(fig,use_container_width=True)
 
 # -----------------------------
@@ -259,7 +271,7 @@ elif section==TEXT[LANG]["house_forecast"]:
     fig.add_trace(go.Scatter(x=df["timestamp"],y=df["aggregate"],name=TEXT[LANG]["historical"],hovertext=hist_hover,hoverinfo="text"))
     fc_hover=forecast_df.apply(lambda row:f"{TEXT[LANG]['time']}: {format_hover_time(row['timestamp'])}<br>{TEXT[LANG]['power']}: {format_hover_value(row['forecast'])}",axis=1)
     fig.add_trace(go.Scatter(x=forecast_df["timestamp"],y=forecast_df["forecast"],name=TEXT[LANG]["forecast"],line=dict(dash="dash"),hovertext=fc_hover,hoverinfo="text"))
-    fig.update_layout(title=f"{house_id} – {TEXT[LANG]['house_forecast_title']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
+    fig.update_layout(height=600,autosize=True,margin=dict(l=60,r=60,t=80,b=60),title=f"{house_id} – {TEXT[LANG]['house_forecast_title']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
     st.plotly_chart(fig,use_container_width=True)
 
 # -----------------------------
@@ -275,5 +287,5 @@ elif section==TEXT[LANG]["area_forecast"]:
     fig.add_trace(go.Scatter(x=df["timestamp"],y=df["aggregate"],name=TEXT[LANG]["historical"],hovertext=hist_hover,hoverinfo="text"))
     fc_hover=forecast_df.apply(lambda row:f"{TEXT[LANG]['time']}: {format_hover_time(row['timestamp'])}<br>{TEXT[LANG]['power']}: {format_hover_value(row['forecast'])}",axis=1)
     fig.add_trace(go.Scatter(x=forecast_df["timestamp"],y=forecast_df["forecast"],name=TEXT[LANG]["forecast"],line=dict(dash="dash"),hovertext=fc_hover,hoverinfo="text"))
-    fig.update_layout(title=f"{area_id} – {TEXT[LANG]['area_forecast_title']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
+    fig.update_layout(height=600,autosize=True,margin=dict(l=60,r=60,t=80,b=60),title=f"{area_id} – {TEXT[LANG]['area_forecast_title']}",xaxis_title=TEXT[LANG]["time"],yaxis_title=TEXT[LANG]["power"],hovermode="x unified")
     st.plotly_chart(fig,use_container_width=True)
