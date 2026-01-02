@@ -20,6 +20,19 @@ def toggle_language():
 LANG = st.session_state.lang
 
 # -------------------------------------------------
+# Arabic numeral converter
+# -------------------------------------------------
+AR_NUMS = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+
+def format_number(val):
+    s = f"{val:.2f}"
+    return s.translate(AR_NUMS) if LANG == "ar" else s
+
+def format_time(ts):
+    s = ts.strftime("%Y-%m-%d %H:%M")
+    return s.translate(AR_NUMS) if LANG == "ar" else s
+
+# -------------------------------------------------
 # Translations
 # -------------------------------------------------
 TEXT = {
@@ -108,7 +121,7 @@ LOAD_CATEGORIES = {
 }
 
 # -------------------------------------------------
-# Page config
+# Page config + RTL
 # -------------------------------------------------
 st.set_page_config(page_title=TEXT[LANG]["page_title"], layout="wide")
 
@@ -142,33 +155,7 @@ credentials = load_credentials()
 st.sidebar.button(TEXT[LANG]["lang_btn"], on_click=toggle_language)
 
 # -------------------------------------------------
-# Signup form
-# -------------------------------------------------
-st.sidebar.header(TEXT[LANG]["user_access"])
-
-if "show_signup" not in st.session_state:
-    st.session_state.show_signup = False
-
-if st.sidebar.button(TEXT[LANG]["signup"]):
-    st.session_state.show_signup = True
-
-if st.session_state.show_signup:
-    st.sidebar.subheader(TEXT[LANG]["create_account"])
-    new_username = st.sidebar.text_input(TEXT[LANG]["national_id"])
-    new_name = st.sidebar.text_input(TEXT[LANG]["full_name"])
-    new_password = st.sidebar.text_input(TEXT[LANG]["password"], type="password")
-
-    if st.sidebar.button(TEXT[LANG]["register"]):
-        credentials["credentials"]["usernames"][new_username] = {
-            "name": new_name,
-            "password": new_password
-        }
-        with open(CREDENTIALS_FILE, "w") as file:
-            yaml.dump(credentials, file)
-        st.session_state.show_signup = False
-
-# -------------------------------------------------
-# Authenticator
+# Authenticator (UNCHANGED)
 # -------------------------------------------------
 authenticator = stauth.Authenticate(
     credentials=credentials["credentials"],
@@ -199,7 +186,7 @@ authenticator.logout(TEXT[LANG]["logout"], "sidebar")
 st.title(TEXT[LANG]["dashboard_title"])
 
 # -------------------------------------------------
-# Mock data generators (UNCHANGED)
+# Data generators (UNCHANGED)
 # -------------------------------------------------
 def generate_time_series(start, end, freq="15min"):
     return pd.date_range(start=start, end=end, freq=freq)
@@ -219,28 +206,18 @@ def generate_area_data(area_id, start, end):
 
 def generate_forecast(df, horizon_hours=24):
     last_time = df["timestamp"].iloc[-1]
-    future_index = pd.date_range(
-        start=last_time + timedelta(minutes=15),
-        periods=horizon_hours * 4,
-        freq="15min"
-    )
-    forecast = df["aggregate"].iloc[-1] + np.cumsum(
-        np.random.normal(0, 0.05, len(future_index))
-    )
+    future_index = pd.date_range(start=last_time + timedelta(minutes=15),
+                                 periods=horizon_hours * 4, freq="15min")
+    forecast = df["aggregate"].iloc[-1] + np.cumsum(np.random.normal(0, 0.05, len(future_index)))
     return pd.DataFrame({"timestamp": future_index, "forecast": forecast})
 
 # -------------------------------------------------
 # Sidebar controls
 # -------------------------------------------------
 st.sidebar.header(TEXT[LANG]["controls"])
-
 section = st.sidebar.radio(
     TEXT[LANG]["analysis_type"],
-    [
-        TEXT[LANG]["house_disagg"],
-        TEXT[LANG]["house_forecast"],
-        TEXT[LANG]["area_forecast"]
-    ]
+    [TEXT[LANG]["house_disagg"], TEXT[LANG]["house_forecast"], TEXT[LANG]["area_forecast"]]
 )
 
 start_date = st.sidebar.date_input(TEXT[LANG]["start_date"], datetime.now() - timedelta(days=7))
@@ -259,6 +236,11 @@ if section == TEXT[LANG]["house_disagg"]:
         x=df["timestamp"],
         y=df["aggregate"],
         name=TEXT[LANG]["aggregate"],
+        hovertemplate=f"{TEXT[LANG]['time']}: %{{customdata[0]}}<br>{TEXT[LANG]['power']}: %{{customdata[1]}}<extra></extra>",
+        customdata=np.stack([
+            df["timestamp"].apply(format_time),
+            df["aggregate"].apply(format_number)
+        ], axis=-1),
         line=dict(width=3)
     ))
 
@@ -266,7 +248,9 @@ if section == TEXT[LANG]["house_disagg"]:
         fig.add_trace(go.Scatter(
             x=df["timestamp"],
             y=df[code],
-            name=labels[LANG]
+            name=labels[LANG],
+            hovertemplate=f"{labels[LANG]}<br>{TEXT[LANG]['power']}: %{{customdata}}<extra></extra>",
+            customdata=df[code].apply(format_number)
         ))
 
     fig.update_layout(
@@ -276,6 +260,7 @@ if section == TEXT[LANG]["house_disagg"]:
         hovermode="x unified"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 # -------------------------------------------------
 # SECTION 2 – House Forecast
