@@ -131,32 +131,7 @@ st.sidebar.radio(
 )
 LANG = st.session_state.lang
 apply_language_css(LANG)
-if LANG == "ar":
-    st.markdown("""
-    <style>
-    label:has(+ input[type="text"])::before {
-        content: "الرقم الوطني";
-        display: block;
-        font-weight: 600;
-    }
-    label:has(+ input[type="text"]) {
-        display: none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-    label:has(+ input[type="text"])::before {
-        content: "National ID";
-        display: block;
-        font-weight: 600;
-    }
-    label:has(+ input[type="text"]) {
-        display: none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
 
 # -----------------------------
 # YAML credentials
@@ -196,6 +171,46 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=credentials["cookie"]["expiry_days"]
 )
 authenticator.login(location="main",key="login_form")
+
+if LANG == "ar":
+    st.markdown("""
+    <style>
+    /* Hide the first text input label (Username) */
+    div[data-testid="stTextInput"]:nth-of-type(1) label {
+        display: none;
+    }
+
+    /* Add Arabic National ID label */
+    div[data-testid="stTextInput"]:nth-of-type(1)::before {
+        content: "الرقم الوطني";
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-align: right;
+        direction: rtl;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+    /* Hide the first text input label (Username) */
+    div[data-testid="stTextInput"]:nth-of-type(1) label {
+        display: none;
+    }
+
+    /* Add English National ID label */
+    div[data-testid="stTextInput"]:nth-of-type(1)::before {
+        content: "National ID";
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-align: left;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 auth_status = st.session_state.get("authentication_status")
 user_name = st.session_state.get("name")
 if auth_status: st.success(f"{TEXT[LANG]['welcome']} {user_name}")
