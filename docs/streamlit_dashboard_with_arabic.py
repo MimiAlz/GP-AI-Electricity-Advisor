@@ -314,7 +314,7 @@ elif section == TEXT[LANG]["house_forecast"]:
 # SECTION 3 – Area Forecast
 # -------------------------------------------------
 
-  elif section == TEXT[LANG]["area_forecast"]:
+elif section == TEXT[LANG]["area_forecast"]:
     st.subheader(TEXT[LANG]["area_forecast_title"])
     area_id = st.sidebar.selectbox(TEXT[LANG]["area_id"], ["Area_A", "Area_B", "Area_C"])
     df = generate_area_data(area_id, start_date, end_date)
@@ -356,4 +356,4 @@ elif section == TEXT[LANG]["house_forecast"]:
         hovermode="x unified"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)  
