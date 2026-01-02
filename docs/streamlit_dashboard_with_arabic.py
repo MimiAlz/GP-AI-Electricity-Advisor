@@ -272,16 +272,32 @@ elif section == TEXT[LANG]["house_forecast"]:
     forecast_df = generate_forecast(df)
 
     fig = go.Figure()
+
     fig.add_trace(go.Scatter(
         x=df["timestamp"],
         y=df["aggregate"],
-        name=TEXT[LANG]["historical"]
+        name=TEXT[LANG]["historical"],
+        hovertemplate=f"{TEXT[LANG]['time']}: %{{customdata[0]}}<br>"
+                      f"{TEXT[LANG]['power']}: %{{customdata[1]}}"
+                      "<extra></extra>",
+        customdata=np.stack([
+            df["timestamp"].apply(format_time),
+            df["aggregate"].apply(format_number)
+        ], axis=-1)
     ))
+
     fig.add_trace(go.Scatter(
         x=forecast_df["timestamp"],
         y=forecast_df["forecast"],
         name=TEXT[LANG]["forecast"],
-        line=dict(dash="dash")
+        line=dict(dash="dash"),
+        hovertemplate=f"{TEXT[LANG]['time']}: %{{customdata[0]}}<br>"
+                      f"{TEXT[LANG]['power']}: %{{customdata[1]}}"
+                      "<extra></extra>",
+        customdata=np.stack([
+            forecast_df["timestamp"].apply(format_time),
+            forecast_df["forecast"].apply(format_number)
+        ], axis=-1)
     ))
 
     fig.update_layout(
@@ -290,28 +306,47 @@ elif section == TEXT[LANG]["house_forecast"]:
         yaxis_title=TEXT[LANG]["power"],
         hovermode="x unified"
     )
+
     st.plotly_chart(fig, use_container_width=True)
+
 
 # -------------------------------------------------
 # SECTION 3 – Area Forecast
 # -------------------------------------------------
-elif section == TEXT[LANG]["area_forecast"]:
+
+  elif section == TEXT[LANG]["area_forecast"]:
     st.subheader(TEXT[LANG]["area_forecast_title"])
     area_id = st.sidebar.selectbox(TEXT[LANG]["area_id"], ["Area_A", "Area_B", "Area_C"])
     df = generate_area_data(area_id, start_date, end_date)
     forecast_df = generate_forecast(df)
 
     fig = go.Figure()
+
     fig.add_trace(go.Scatter(
         x=df["timestamp"],
         y=df["aggregate"],
-        name=TEXT[LANG]["historical"]
+        name=TEXT[LANG]["historical"],
+        hovertemplate=f"{TEXT[LANG]['time']}: %{{customdata[0]}}<br>"
+                      f"{TEXT[LANG]['power']}: %{{customdata[1]}}"
+                      "<extra></extra>",
+        customdata=np.stack([
+            df["timestamp"].apply(format_time),
+            df["aggregate"].apply(format_number)
+        ], axis=-1)
     ))
+
     fig.add_trace(go.Scatter(
         x=forecast_df["timestamp"],
         y=forecast_df["forecast"],
         name=TEXT[LANG]["forecast"],
-        line=dict(dash="dash")
+        line=dict(dash="dash"),
+        hovertemplate=f"{TEXT[LANG]['time']}: %{{customdata[0]}}<br>"
+                      f"{TEXT[LANG]['power']}: %{{customdata[1]}}"
+                      "<extra></extra>",
+        customdata=np.stack([
+            forecast_df["timestamp"].apply(format_time),
+            forecast_df["forecast"].apply(format_number)
+        ], axis=-1)
     ))
 
     fig.update_layout(
@@ -320,4 +355,5 @@ elif section == TEXT[LANG]["area_forecast"]:
         yaxis_title=TEXT[LANG]["power"],
         hovermode="x unified"
     )
+
     st.plotly_chart(fig, use_container_width=True)
