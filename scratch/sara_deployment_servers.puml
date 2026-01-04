@@ -1,0 +1,39 @@
+@startuml
+title NILM Pipeline - Deployment Diagram
+
+skinparam componentStyle rectangle
+
+node "User Device" <<client>> as UD {
+    artifact "Web Browser" as WB
+}
+
+node "Backend Server" <<application server>> as BS {
+    artifact "Result Service" as RS
+    artifact "Data Reader Module" as DRM
+    artifact "Backend API\n(Flask / FastAPI / Spring etc.)" as API
+}
+
+node "Model Service Server" <<application server>> as MSS {
+    artifact "NILM Model Service" as NMS
+    artifact "Trained NILM Model\n(.pkl / .h5 / etc.)" as TNM
+    NMS -- TNM
+}
+
+node "Meter Data DB Server" <<database>> as MDDBS {
+    database "Meter Data DB\n(SQL or Time-Series DB)" as MDDB
+}
+
+node "Historical SQL DB Server" <<database>> as HSDBS {
+    database "Historical SQL DB\n(results + logs)" as HSDB
+}
+
+' Relationships
+WB --> API : HTTPS\n(Dashboard requests)
+
+API --> NMS : REST / gRPC\n(send prepared data)
+NMS --> API : results response
+
+API --> MDDB : SQL query\n(read-only)
+API --> HSDB : SQL insert / select
+
+@enduml
