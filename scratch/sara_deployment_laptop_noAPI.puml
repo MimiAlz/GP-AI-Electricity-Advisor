@@ -1,0 +1,28 @@
+@startuml
+title NILM Pipeline - Single Laptop Deployment (Streamlit Only)
+
+node "User Laptop" <<device>> {
+
+  artifact "Streamlit App\n(UI + Pipeline Logic)" as streamlit
+
+  node "Local Python Environment" <<execution environment>> {
+    
+    artifact "Data Reader Module" as reader
+    artifact "Preprocessing Module" as prep
+    artifact "NILM Model Module" as model_service
+    artifact "Trained NILM Model\n(.pkl / .h5)" as model_file
+    
+    database "Meter Data SQL DB\n(pre-seeded data)" as meter_db
+    database "Historical SQL DB\n(results + logs)" as sql_db
+  }
+}
+
+' Relationships
+streamlit --> reader
+streamlit --> prep
+streamlit --> model_service
+model_service --> model_file
+reader --> meter_db : local SQL query
+streamlit --> sql_db : local SQL insert/select
+
+@enduml

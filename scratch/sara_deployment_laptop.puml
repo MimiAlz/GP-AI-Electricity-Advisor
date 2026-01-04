@@ -1,0 +1,31 @@
+@startuml
+title NILM Pipeline - Single Laptop Deployment
+
+node "User Laptop" <<device>> {
+
+  artifact "Web Browser\n(Dashboard UI)" as browser
+
+  node "Local Application Environment" <<execution environment>> {
+    
+    artifact "Backend API Service" as backend
+    artifact "Data Reader Module" as reader
+    artifact "NILM Model Service\n(or integrated module)" as model_service
+    artifact "Trained NILM Model\n(.pkl / .h5)" as model_file
+    
+    database "Meter Data SQL DB\n(pre-seeded data)" as meter_db
+    database "Historical SQL DB\n(results + logs)" as sql_db
+  }
+}
+
+' Relationships
+browser --> backend : HTTP (localhost)
+backend --> reader
+reader --> meter_db : SQL query (local)
+backend --> model_service : internal call
+model_service --> model_file
+backend --> sql_db : SQL insert/select (local)
+
+@enduml
+
+
+' For development and demonstration purposes, the entire NILM pipeline is deployed on a single laptop. All services (backend API, NILM model service, and databases) run locally. Although everything is hosted on one device, the architecture preserves modular separation so that individual components can later be migrated to separate servers or cloud environments without redesigning the system.

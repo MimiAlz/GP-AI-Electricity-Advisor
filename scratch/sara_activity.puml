@@ -1,0 +1,51 @@
+@startuml
+title NILM Pipeline (Activity Diagram)
+
+' ---------------------------
+' Meter Data Source (read only)
+' ---------------------------
+|Meter Data Storage (DB)|
+start
+:Query consumption data\n(from SQL / Influx-like DB);
+:Retrieve records\n(3-minute granularity);
+
+' ---------------------------
+' Ingestion + Preparation
+' ---------------------------
+|Data Ingestion & Preparation|
+:Validate data\n(check format & completeness);
+
+if (Data valid?) then (Yes)
+  :Format conversion, resampling,\nnormalization;
+  :Forward prepared data to inference;
+else (No)
+  :Create validation log entry;
+  |Historical SQL Storage|
+  :Store log record\n(validation failure);
+  stop
+endif
+
+' ---------------------------
+' Inference
+' ---------------------------
+|Model Inference|
+:Run NILM inference\n(load latest model if needed);
+:Perform disaggregation;
+:Generate appliance-level results;
+
+' ---------------------------
+' Historical storage
+' ---------------------------
+|Historical SQL Storage|
+:Store disaggregation results;
+:Store processing logs;
+
+' ---------------------------
+' Dashboard / visualization
+' ---------------------------
+|Dashboard / Visualization|
+:Query historical SQL storage;
+:Display results on dashboard;
+
+stop
+@enduml
