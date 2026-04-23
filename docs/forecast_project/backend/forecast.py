@@ -1,17 +1,17 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List
 from forecasting_pipeline import forecast
 
 router = APIRouter()
 
 class ForecastRequest(BaseModel):
-    values: List[float]
-    steps: int
+    meter_id: str
+    timestamps: list[str]
+    readings: list[float]
 
 @router.post("/forecast")
 def run_forecast(request: ForecastRequest):
-    result = forecast(request.values, request.steps)
+    result = forecast(request.timestamps, request.readings, request.meter_id)
 
     return {
         "status": "success",

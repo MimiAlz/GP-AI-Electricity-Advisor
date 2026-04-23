@@ -1,8 +1,7 @@
 /data
 /.env
-<<<<<<< Updated upstream
 
 out/
-=======
 /.conda
->>>>>>> Stashed changes
+
+docs/forecast_project/data

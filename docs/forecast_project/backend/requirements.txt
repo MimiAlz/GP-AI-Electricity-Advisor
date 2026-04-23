@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+supabase
+bcrypt
+numpy
+pandas
+torch
+scikit-learn

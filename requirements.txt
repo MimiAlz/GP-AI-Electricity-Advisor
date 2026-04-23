@@ -7,6 +7,11 @@ ipykernel
 build
 Cython
 wheel
+fastapi
+uvicorn
+joblib
+requests
+supabase
 streamlit>=1.30.0
 streamlit-authenticator>=0.3.0
 plotly>=5.20.0
@@ -14,3 +19,5 @@ pandas>=2.0.0
 numpy>=1.25.0
 PyYAML>=6.0
 bcrypt
+torch
+scikit-learn

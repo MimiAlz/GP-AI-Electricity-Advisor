@@ -7,4 +7,10 @@ theme:
 
 nav:
   - Home: index.md
+  - Backend: backend.md
+  - Forecasting Flow: ../docs/forecast_project/FORECASTING_FLOW.md
+  - Design: design.md
+  - Plan: plan.md
+  - Background: background.md
+  - Progress: progress.md
 
