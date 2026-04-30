@@ -10,4 +10,17 @@ docs/forecast_project/data
 docs/forecast_project/data
 
 data/
+<<<<<<< HEAD
 >>>>>>> 72d0840 (preprocessing nilm and model lstm)
+=======
+
+
+
+
+
+
+/data nilm/nilm_datasets/
+/data nilm/checkpoints/
+*.npy
+*.pt
+>>>>>>> 154d77e (preprocessing nilm and model)
