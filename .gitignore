@@ -1,26 +1,15 @@
-/data
-/.env
+.env
+.conda/
 
 out/
-/.conda
+docs/forecast_project/data/
 
-<<<<<<< HEAD
-docs/forecast_project/data
-=======
-docs/forecast_project/data
-
+nilm_datasets/
 data/
-<<<<<<< HEAD
->>>>>>> 72d0840 (preprocessing nilm and model lstm)
-=======
 
-
-
-
-
-
-/data nilm/nilm_datasets/
-/data nilm/checkpoints/
 *.npy
 *.pt
->>>>>>> 154d77e (preprocessing nilm and model)
+*.csv
+
+__pycache__/
+*.ipynb_checkpoints/
