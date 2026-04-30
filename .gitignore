@@ -4,4 +4,10 @@
 out/
 /.conda
 
+<<<<<<< HEAD
 docs/forecast_project/data
+=======
+docs/forecast_project/data
+
+data/
+>>>>>>> 72d0840 (preprocessing nilm and model lstm)
