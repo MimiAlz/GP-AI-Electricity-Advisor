@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography, Switch, Tag } from 'antd';
+import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography, Switch } from 'antd';
 import {
   HomeOutlined,
   ThunderboltOutlined,
+  AreaChartOutlined,
   LineChartOutlined,
-  ApiOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -20,10 +20,11 @@ const { Text } = Typography;
 
 const NAV_ITEMS = [
   { key: '/houses',        icon: <HomeOutlined />,      labelKey: 'navHouses' },
+  { key: '/nilm-overview', icon: <ThunderboltOutlined />, labelKey: 'navNilmOverview' },
   { key: '/forecast',      icon: <LineChartOutlined />, labelKey: 'navForecast' },
-  { key: '/profile',       icon: <UserOutlined />,      labelKey: 'navProfile' },
+  { key: '/area-forecast', icon: <AreaChartOutlined />, labelKey: 'navAreaForecast' },
+ // { key: '/profile',       icon: <UserOutlined />,      labelKey: 'navProfile' },
 //   { key: '/disaggregation', icon: <ThunderboltOutlined />, labelKey: 'navDisaggregation' },
-//   { key: '/area-forecast', icon: <AreaChartOutlined />, labelKey: 'navAreaForecast' },
 //   { key: '/backend-test', icon: <ApiOutlined />, labelKey: 'navBackendTest' },
 ];
 
@@ -179,7 +180,7 @@ export default function AppLayout({ children }) {
         </Content>
 
         <Footer style={{ textAlign: 'center', color: '#aaa', fontSize: 13 }}>
-          <img width={23} src="secondLogo.svg" alt="Logo" /> {T.appTitle} © {new Date().getFullYear()}
+          <img width={23} src="elecLogo.svg" alt="Logo" /> {T.appTitle} © {new Date().getFullYear()}
         </Footer>
       </Layout>
     </Layout>

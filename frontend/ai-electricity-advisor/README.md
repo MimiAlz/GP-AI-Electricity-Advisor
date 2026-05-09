@@ -11,6 +11,20 @@ This frontend is a React app (Vite template) that connects to the backend for au
 
 ## Development
 
+Create a local env file before starting Vite:
+
+```bash
+cp .env.example .env.local
+```
+
+Then set the backend base URL in `.env.local`:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain.example.com
+```
+
+If `VITE_API_BASE_URL` is missing, the frontend falls back to `http://127.0.0.1:8000` for local backend development.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

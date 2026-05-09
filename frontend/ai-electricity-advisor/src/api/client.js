@@ -51,6 +51,24 @@ export const forecastApi = {
     apiCall('POST', `/users/${nationalId}/houses/${houseId}/forecasts`, { forecast_month }),
 };
 
+export const nilmApi = {
+  disaggregate: (nationalId, houseId, month) =>
+    apiCall('POST', `/users/${nationalId}/houses/${houseId}/nilm`, { month }),
+  appliances: () =>
+    apiCall('GET', '/nilm/appliances'),
+  availableMonths: (nationalId, houseId) =>
+    apiCall('GET', `/users/${nationalId}/houses/${houseId}/nilm/available-months`),
+};
+
+export const xgbForecastApi = {
+  predict: (meterId, targetMonth, model) =>
+    apiCall('POST', '/xgb/forecast', { meter_id: meterId, target_month: targetMonth, model }),
+  availableMonths: (model, meterId = null) => {
+    const q = meterId ? `?model=${model}&meter_id=${encodeURIComponent(meterId)}` : `?model=${model}`;
+    return apiCall('GET', `/xgb/available-months${q}`);
+  },
+};
+
 export const healthApi = {
   hello: () => fetch(`${BASE_URL}/hello`).then((r) => r.text()),
 };

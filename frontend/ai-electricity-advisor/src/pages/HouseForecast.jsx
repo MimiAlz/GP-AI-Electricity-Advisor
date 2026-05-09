@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Card, Select, DatePicker, Typography, Space, Row, Col, Statistic,
-  Tag, Empty, Alert, Button,
+  Badge, Card, Select, DatePicker, Typography, Space, Row, Col, Statistic,
+  Tag, Empty, Alert, Button, Tooltip,
 } from 'antd';
 import {
-  LineChartOutlined, SendOutlined,
+  LineChartOutlined, SendOutlined, CalendarOutlined, CheckCircleOutlined,
 } from '@ant-design/icons';
 import plotlyFactoryModule from 'react-plotly.js/factory.js';
 import Plotly from 'plotly.js-dist-min';
 import dayjs from 'dayjs';
-import { houseApi, forecastApi } from '../api/client';
+import { houseApi, xgbForecastApi } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useLang } from '../contexts/LangContext';
 
@@ -52,10 +52,12 @@ export default function HouseForecast() {
   const [houses, setHouses] = useState([]);
   const [houseId, setHouseId] = useState(null);
   const [loadingHouses, setLoadingHouses] = useState(true);
-  const [forecastMonth, setForecastMonth] = useState(dayjs().add(1, 'month'));
+  const [forecastMonth, setForecastMonth] = useState(null);
   const [forecasting, setForecasting] = useState(false);
   const [forecastResult, setForecastResult] = useState(null);
   const [forecastError, setForecastError] = useState('');
+  const [availableMonths, setAvailableMonths] = useState([]);
+  const [loadingMonths, setLoadingMonths] = useState(false);
 
   useEffect(() => {
     houseApi.list(user.national_id)
@@ -68,19 +70,33 @@ export default function HouseForecast() {
       .finally(() => setLoadingHouses(false));
   }, [user.national_id]);
 
+  // Fetch available months whenever the selected house changes
+  useEffect(() => {
+    if (!houseId) { setAvailableMonths([]); return; }
+    setLoadingMonths(true);
+    setAvailableMonths([]);
+    setForecastMonth(null);
+    xgbForecastApi.availableMonths('per_month', houseId)
+      .then((data) => {
+        const months = data?.available_months ?? [];
+        setAvailableMonths(months);
+        if (months.length > 0) setForecastMonth(dayjs(months[0]));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMonths(false));
+  }, [houseId]);
+
   const runForecast = async () => {
-    if (!houseId) return;
+    if (!houseId || !forecastMonth) return;
     setForecasting(true);
     setForecastError('');
     try {
       const monthStr = forecastMonth.format('YYYY-MM');
-      const result = await forecastApi.create(user.national_id, houseId, monthStr);
+      const result = await xgbForecastApi.predict(houseId, monthStr, 'per_month');
 
-      // API now returns real predicted_energy_kwh, estimated_bill_jod, tariff_tier
-      const f = result?.forecast ?? {};
-      const realTotalKwh    = f.predicted_energy_kwh ?? 0;
-      const realBill        = f.estimated_bill_jod   ?? (realTotalKwh * 0.12);
-      const realTier        = f.tariff_tier           ?? null;
+      const realTotalKwh = result?.predicted_kwh ?? 0;
+      const realBill     = result?.estimated_bill_jod ?? 0;
+      const realTier     = result?.tariff_tier ?? null;
 
       // Scale a synthetic hourly curve to the real total (backend returns scalar only)
       const mock = generateForecast(forecastMonth.toDate());
@@ -99,7 +115,6 @@ export default function HouseForecast() {
         total_kwh:           realTotalKwh.toFixed(2),
         estimated_bill_jod:  Number(realBill).toFixed(3),
         tariff_tier:         realTier,
-        forecast_id:         f.forecast_id,
       });
     } catch (err) {
       setForecastError(err.message || 'Forecast failed.');
@@ -138,6 +153,9 @@ export default function HouseForecast() {
     return traces;
   }, [forecastResult, T]);
 
+  const selectedMonthStr = forecastMonth ? forecastMonth.format('YYYY-MM') : null;
+  const monthInAvailable = selectedMonthStr && availableMonths.includes(selectedMonthStr);
+
   const houseOptions = houses.map((h) => ({ value: h.house_id, label: h.house_id }));
 
   return (
@@ -174,7 +192,6 @@ export default function HouseForecast() {
                 value={forecastMonth}
                 onChange={setForecastMonth}
                 style={{ width: '100%' }}
-                disabledDate={(d) => d && d < dayjs().endOf('month')}
               />
             </Space>
           </Col>
@@ -185,13 +202,47 @@ export default function HouseForecast() {
               size="large"
               onClick={runForecast}
               loading={forecasting}
-              disabled={!houseId}
+              disabled={!houseId || !monthInAvailable}
               style={{ width: '100%' }}
             >
               {T.runForecast}
             </Button>
           </Col>
         </Row>
+
+        {/* Available months panel */}
+        {houseId && (
+          <div style={{ marginBottom: 16 }}>
+            <Space style={{ marginBottom: 6 }}>
+              <CalendarOutlined style={{ color: '#1677ff' }} />
+              <Text type="secondary">{T.nilmAvailableMonths}</Text>
+              {!loadingMonths && (
+                <Badge count={availableMonths.length} size="small" style={{ backgroundColor: '#1677ff' }} />
+              )}
+            </Space>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {loadingMonths && <Text type="secondary">Loading…</Text>}
+              {!loadingMonths && availableMonths.length === 0 && (
+                <Tag color="warning">{T.nilmNoData}</Tag>
+              )}
+              {availableMonths.map((m) => {
+                const isSelected = m === selectedMonthStr;
+                return (
+                  <Tooltip key={m} title={T.nilmClickToSelect}>
+                    <Tag
+                      color={isSelected ? 'blue' : 'default'}
+                      icon={isSelected ? <CheckCircleOutlined /> : null}
+                      style={{ cursor: 'pointer', fontSize: 13 }}
+                      onClick={() => setForecastMonth(dayjs(m))}
+                    >
+                      {m}
+                    </Tag>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Forecast KPI cards */}
         {forecastResult && (

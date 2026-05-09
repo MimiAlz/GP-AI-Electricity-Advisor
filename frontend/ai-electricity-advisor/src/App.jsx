@@ -11,8 +11,9 @@ import AppLayout from './components/AppLayout';
 import HouseManagement from './pages/HouseManagement';
 // import HouseDisaggregation from './pages/HouseDisaggregation';
 import HouseForecast from './pages/HouseForecast';
+import NilmOverview from './pages/NilmOverview';
 import ProfilePage from './pages/ProfilePage';
-// import AreaForecast from './pages/AreaForecast';
+import AreaForecast from './pages/AreaForecast';
 import BackendTest from './pages/BackendTest';
 
 const THEME = {
@@ -48,10 +49,10 @@ function AppRoutes() {
           <Routes>
             <Route path="/" element={<Navigate to="/houses" replace />} />
             <Route path="/houses" element={<HouseManagement />} />
-            {/* <Route path="/disaggregation" element={<HouseDisaggregation />} /> */}
+            <Route path="/nilm-overview" element={<NilmOverview />} />
             <Route path="/forecast" element={<HouseForecast />} />
+            <Route path="/area-forecast" element={<AreaForecast />} />
             <Route path="/profile" element={<ProfilePage />} />
-            {/* <Route path="/area-forecast" element={<AreaForecast />} /> */}
             <Route path="/backend-test" element={<BackendTest />} />
             <Route path="*" element={<Navigate to="/houses" replace />} />
           </Routes>
