@@ -19,3 +19,7 @@ __pycache__/
 /jepco/splits/*
 
 /data_nilm/nilm_results/*
+
+/docs/forecast_project/backend/splits/*
+
+/docs/forecast_project/backend/__pycache__/*

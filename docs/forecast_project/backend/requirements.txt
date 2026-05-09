@@ -2,6 +2,7 @@ fastapi
 uvicorn
 supabase
 bcrypt
+python-dotenv
 numpy
 pandas
 torch
