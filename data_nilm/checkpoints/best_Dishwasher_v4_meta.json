@@ -1,0 +1,22 @@
+{
+  "appliance": "Dishwasher",
+  "norm_cap": 823.0,
+  "max_len": 107,
+  "opt_thr": 0.7249999999999998,
+  "thr_watts": 596.6749999999998,
+  "n_channels": 7,
+  "hidden1": 128,
+  "hidden2": 64,
+  "dropout": 0.4,
+  "checkpoint": "checkpoints/best_Dishwasher_v4.pt",
+  "metrics": {
+    "MAE_W": 100.99663543701172,
+    "RMSE_W": 190.80950087718378,
+    "F1": 0.9208079507662819,
+    "Precision": 0.9119390347161489,
+    "Recall": 0.9298510684219878,
+    "Accuracy": 0.9236082474225852,
+    "ON_thr_norm": 0.060753341433778855,
+    "ON_thr_watts": 50.0
+  }
+}

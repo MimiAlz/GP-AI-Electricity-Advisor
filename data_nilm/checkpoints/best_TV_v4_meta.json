@@ -1,0 +1,22 @@
+{
+  "appliance": "TV",
+  "norm_cap": 360.0,
+  "max_len": 302,
+  "opt_thr": 0.2099999999999999,
+  "thr_watts": 75.59999999999997,
+  "n_channels": 7,
+  "hidden1": 128,
+  "hidden2": 64,
+  "dropout": 0.2,
+  "checkpoint": "checkpoints/best_TV_v4.pt",
+  "metrics": {
+    "MAE_W": 42.19599151611328,
+    "RMSE_W": 55.31851132588891,
+    "F1": 0.9982967567878492,
+    "Precision": 0.9967296749296228,
+    "Recall": 0.9998687750146972,
+    "Accuracy": 0.9967689822293403,
+    "ON_thr_norm": 0.1388888888888889,
+    "ON_thr_watts": 50.0
+  }
+}
