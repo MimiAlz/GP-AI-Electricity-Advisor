@@ -1,0 +1,22 @@
+{
+  "appliance": "Clothes Washer",
+  "norm_cap": 907.0,
+  "max_len": 46,
+  "opt_thr": 0.05,
+  "thr_watts": 45.35,
+  "n_channels": 7,
+  "hidden1": 192,
+  "hidden2": 96,
+  "dropout": 0.5,
+  "checkpoint": "checkpoints/best_Clothes_Washer_v4.pt",
+  "metrics": {
+    "MAE_W": 111.32807159423828,
+    "RMSE_W": 149.60817966232662,
+    "F1": 0.7661469928456015,
+    "Precision": 0.6209386281586953,
+    "Recall": 0.9999999999996124,
+    "Accuracy": 0.6209386281586953,
+    "ON_thr_norm": 0.05512679162072767,
+    "ON_thr_watts": 50.0
+  }
+}

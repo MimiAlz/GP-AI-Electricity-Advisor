@@ -1,0 +1,22 @@
+{
+  "appliance": "Kitchen Fridge",
+  "norm_cap": 445.0,
+  "max_len": 373,
+  "opt_thr": 0.2649999999999999,
+  "thr_watts": 117.92499999999995,
+  "n_channels": 7,
+  "hidden1": 128,
+  "hidden2": 64,
+  "dropout": 0.3,
+  "checkpoint": "checkpoints/best_Kitchen_Fridge_v4.pt",
+  "metrics": {
+    "MAE_W": 15.74553108215332,
+    "RMSE_W": 39.594258703322446,
+    "F1": 0.9685363750715594,
+    "Precision": 0.9616836881472786,
+    "Recall": 0.9754874245380917,
+    "Accuracy": 0.9740000299280159,
+    "ON_thr_norm": 0.11235955056179775,
+    "ON_thr_watts": 50.0
+  }
+}

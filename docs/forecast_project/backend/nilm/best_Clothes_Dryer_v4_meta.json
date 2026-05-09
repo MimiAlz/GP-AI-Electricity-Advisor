@@ -1,0 +1,22 @@
+{
+  "appliance": "Clothes Dryer",
+  "norm_cap": 5005.57,
+  "max_len": 143,
+  "opt_thr": 0.7599999999999997,
+  "thr_watts": 3804.2331999999983,
+  "n_channels": 7,
+  "hidden1": 128,
+  "hidden2": 64,
+  "dropout": 0.3,
+  "checkpoint": "checkpoints/best_Clothes_Dryer_v4.pt",
+  "metrics": {
+    "MAE_W": 117.9786376953125,
+    "RMSE_W": 368.8401161072369,
+    "F1": 0.9889423071918582,
+    "Precision": 0.9818615751785289,
+    "Recall": 0.9961259079898324,
+    "Accuracy": 0.9942203794445289,
+    "ON_thr_norm": 0.009988872396150688,
+    "ON_thr_watts": 49.99999999999999
+  }
+}

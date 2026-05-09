@@ -1,0 +1,22 @@
+{
+  "appliance": "Heat Pump",
+  "norm_cap": 2484.0,
+  "max_len": 503,
+  "opt_thr": 0.5049999999999998,
+  "thr_watts": 1254.4199999999994,
+  "n_channels": 7,
+  "hidden1": 128,
+  "hidden2": 64,
+  "dropout": 0.3,
+  "checkpoint": "checkpoints/best_Heat_Pump_v4.pt",
+  "metrics": {
+    "MAE_W": 89.82809448242188,
+    "RMSE_W": 288.70483954204855,
+    "F1": 0.9515891568573033,
+    "Precision": 0.9233096185087153,
+    "Recall": 0.9816557474686729,
+    "Accuracy": 0.9746362563900757,
+    "ON_thr_norm": 0.020128824476650563,
+    "ON_thr_watts": 50.0
+  }
+}
