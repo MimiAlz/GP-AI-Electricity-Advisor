@@ -1,0 +1,1 @@
+["slot_sin", "slot_cos", "dow_sin", "dow_cos", "month_sin", "month_cos", "year_sin", "year_cos", "is_weekend", "is_business_hour", "is_ramadan", "lag_1", "lag_48", "lag_336", "roll_mean_48", "roll_std_48", "roll_mean_336", "area_load_lag_48", "area_load_roll_mean_336", "billing_tier"]

@@ -4,7 +4,7 @@
 out/
 docs/forecast_project/data/
 
-nilm_datasets/
+nilm_datasets/*
 data/
 
 *.npy
@@ -15,3 +15,5 @@ __pycache__/
 *.ipynb_checkpoints/
 
 /.vscode/*
+
+/jepco/splits/*
