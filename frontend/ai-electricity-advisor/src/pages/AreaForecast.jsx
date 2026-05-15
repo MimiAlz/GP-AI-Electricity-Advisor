@@ -9,6 +9,7 @@ import plotlyFactoryModule from 'react-plotly.js/factory.js';
 import Plotly from 'plotly.js-dist-min';
 import dayjs from 'dayjs';
 import { xgbForecastApi } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import { useLang } from '../contexts/LangContext';
 
 const createPlotlyComponent =
@@ -19,6 +20,7 @@ const Plot = createPlotlyComponent(Plotly);
 const { Title, Text, Paragraph } = Typography;
 
 export default function AreaForecast() {
+	const { user } = useAuth();
 	const { T, isRtl } = useLang();
 
 	const [forecastMonth, setForecastMonth] = useState(null);
@@ -46,7 +48,7 @@ export default function AreaForecast() {
 		setForecastError('');
 		try {
 			const monthStr = forecastMonth.format('YYYY-MM');
-			const result = await xgbForecastApi.predict(null, monthStr, 'area');
+			const result = await xgbForecastApi.predict(null, monthStr, 'area', user?.national_id);
 			setForecastResult({
 				month: monthStr,
 				predicted_kwh: result?.predicted_kwh ?? 0,

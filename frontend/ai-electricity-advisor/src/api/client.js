@@ -61,8 +61,8 @@ export const nilmApi = {
 };
 
 export const xgbForecastApi = {
-  predict: (meterId, targetMonth, model) =>
-    apiCall('POST', '/xgb/forecast', { meter_id: meterId, target_month: targetMonth, model }),
+  predict: (meterId, targetMonth, model, nationalId = null) =>
+    apiCall('POST', '/xgb/forecast', { meter_id: meterId, target_month: targetMonth, model, national_id: nationalId }),
   availableMonths: (model, meterId = null) => {
     const q = meterId ? `?model=${model}&meter_id=${encodeURIComponent(meterId)}` : `?model=${model}`;
     return apiCall('GET', `/xgb/available-months${q}`);

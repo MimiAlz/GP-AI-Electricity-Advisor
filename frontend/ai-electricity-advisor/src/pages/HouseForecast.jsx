@@ -92,7 +92,7 @@ export default function HouseForecast() {
     setForecastError('');
     try {
       const monthStr = forecastMonth.format('YYYY-MM');
-      const result = await xgbForecastApi.predict(houseId, monthStr, 'per_month');
+      const result = await xgbForecastApi.predict(houseId, monthStr, 'per_month', user?.national_id);
 
       const realTotalKwh = result?.predicted_kwh ?? 0;
       const realBill     = result?.estimated_bill_jod ?? 0;

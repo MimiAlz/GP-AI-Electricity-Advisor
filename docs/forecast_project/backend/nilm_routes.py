@@ -33,11 +33,14 @@ Returns the list of calendar months present in Electricity_P.csv.
 
 import os
 import calendar
+import logging
 
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
+log = logging.getLogger(__name__)
 
 from nilm_loader import get_nilm_backend
 from supabase_client import get_supabase
@@ -211,6 +214,64 @@ def _run_nilm_csv(backend, df_month: pd.DataFrame, n_days: int) -> dict:
     }
 
 
+def _save_nilm_result(client, national_id: str, house_id: str, response: NilmResponse) -> None:
+    """
+    Upsert the NILM disaggregation result into nilm_result and
+    nilm_appliance_result.  Failures are logged but never propagated to
+    the caller so a DB hiccup never breaks the inference response.
+    """
+    try:
+        # 1. Upsert header row and retrieve the auto-generated id.
+        # returning='representation' is required — the default 'minimal' returns
+        # an empty list, making header.data[0] raise IndexError silently.
+        header = (
+            client.table("nilm_result")
+            .upsert(
+                {
+                    "house_id": house_id,
+                    "national_id": national_id,
+                    "month": response.month,
+                    "total_mains_kwh": response.total_mains_kwh,
+                },
+                on_conflict="house_id,month",
+                returning="representation",
+            )
+            .execute()
+        )
+        if not header.data:
+            # Fallback: fetch the id if upsert still returns nothing
+            row = (
+                client.table("nilm_result")
+                .select("id")
+                .eq("house_id", house_id)
+                .eq("month", response.month)
+                .single()
+                .execute()
+            )
+            nilm_result_id = row.data["id"]
+        else:
+            nilm_result_id = header.data[0]["id"]
+
+        # 2. Upsert one row per appliance
+        for rank, app in enumerate(response.appliances, start=1):
+            client.table("nilm_appliance_result").upsert(
+                {
+                    "nilm_result_id": nilm_result_id,
+                    "appliance": app.name,
+                    "total_kwh": app.total_kwh,
+                    "on_minutes": app.on_minutes,
+                    "peak_watts": app.peak_watts,
+                    "ranking": rank,
+                    "daily_kwh": app.daily_kwh,
+                    "hourly_kwh": app.hourly_kwh,
+                },
+                on_conflict="nilm_result_id,appliance",
+                returning="minimal",
+            ).execute()
+    except Exception as exc:
+        log.warning("Failed to persist NILM result to DB: %s", exc)
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/users/{national_id}/houses/{house_id}/nilm", response_model=NilmResponse)
@@ -270,12 +331,17 @@ def run_nilm_disaggregation(national_id: str, house_id: str, body: NilmRequest):
     appliance_results.sort(key=lambda x: x.total_kwh, reverse=True)
     ranking = [a.name for a in appliance_results]
 
-    return NilmResponse(
+    response = NilmResponse(
         month           = body.month,
         appliances      = appliance_results,
         ranking         = ranking,
         total_mains_kwh = round(results["total_mains_kwh"], 3),
     )
+
+    # 6. Persist results to DB (best-effort — never fails the request)
+    _save_nilm_result(client, national_id, house_id, response)
+
+    return response
 
 
 @router.get("/nilm/appliances")
